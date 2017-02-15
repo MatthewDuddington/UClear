@@ -19,24 +19,17 @@ public class Player : MonoBehaviour
     {
         Vector3 direction = Vector3.zero;
 
-        if (Input.GetKey(KeyCode.A))
+        // Changed input to reference Axis rather than hardcoded keys
+        if (Input.GetButton("Horizontal"))
         {
-            direction = -Vector3.right;
-        }
-        else if (Input.GetKey(KeyCode.D))
-        {
-            direction = Vector3.right;
+            direction += Input.GetAxisRaw("Horizontal") * Vector3.right;
         }
 
-        if (Input.GetKey(KeyCode.W))
+        if (Input.GetButton("Vertical"))
         {
-            direction += Vector3.forward;
-        }
-        else if (Input.GetKey(KeyCode.S))
-        {
-            direction += -Vector3.forward;
+            direction += Input.GetAxisRaw("Vertical") * Vector3.forward;
         }
 
-        mBody.AddForce(direction * Speed * Time.deltaTime);
+        mBody.velocity = (direction * Speed);
     }
 }
