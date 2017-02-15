@@ -24,14 +24,28 @@ public class Map : MonoBehaviour
     private Tile[] tilePrefabs_;
 
     [SerializeField]
-    private Vector2 mapSize;
+    private int mapSizeHorizontal;
+    [SerializeField]
+    private int mapSizeVertical;
 
     // A grid of Z rows * X cols map tiles
     private Tile[,] tileGrid_;
 
     void Awake()
     {
-        tileGrid_ = new Tile[(int) mapSize.x, (int) mapSize.y];
+        // Check for map size having non-odd proportions and adjust if needed
+        if (((int) mapSizeHorizontal) % 2 == 0)
+        {
+            Debug.LogWarning("Map Size horizontal proportion is non-odd, adjusting to compensate");
+            mapSizeHorizontal ++;
+        }
+        if (((int) mapSizeVertical) % 2 == 0)
+        {
+            Debug.LogWarning("Map Size vertical proportion is non-odd, adjusting to compensate");
+            mapSizeVertical ++;
+        }
+
+        tileGrid_ = new Tile[(int) mapSizeVertical, (int) mapSizeHorizontal];
     }
 
     void Start()
@@ -44,38 +58,46 @@ public class Map : MonoBehaviour
     // Add the fixed corner, edge and central tiles
     void AddDefaultTiles()
     {
+        int rightIndex = mapSizeHorizontal - 1;
+        int bottomIndex = mapSizeVertical - 1;
+
         // Corners
-        tileGrid_[0, 0] = Instantiate (tilePrefabs_[0].Init(Tile.tileSize * 0, -Tile.tileSize * 0,false));  // NW
-        tileGrid_[0, 6] = Instantiate (tilePrefabs_[1].Init(Tile.tileSize * 6, -Tile.tileSize * 0,false));  // NE
-        tileGrid_[6, 0] = Instantiate (tilePrefabs_[2].Init(Tile.tileSize * 0, -Tile.tileSize * 6,false));  // SW
-        tileGrid_[6, 6] = Instantiate (tilePrefabs_[3].Init(Tile.tileSize * 6, -Tile.tileSize * 6,false));  // SE
+        tileGrid_[0          , 0         ] = Instantiate (tilePrefabs_[0].Init(Tile.tileSize * 0         , -Tile.tileSize * 0          ,false));  // NW
+        tileGrid_[0          , rightIndex] = Instantiate (tilePrefabs_[1].Init(Tile.tileSize * rightIndex, -Tile.tileSize * 0          ,false));  // NE
+        tileGrid_[bottomIndex, 0         ] = Instantiate (tilePrefabs_[2].Init(Tile.tileSize * 0         , -Tile.tileSize * bottomIndex,false));  // SW
+        tileGrid_[bottomIndex, rightIndex] = Instantiate (tilePrefabs_[3].Init(Tile.tileSize * rightIndex, -Tile.tileSize * bottomIndex,false));  // SE
 
         // Edges
-        // N
-        tileGrid_[0, 2] = Instantiate (tilePrefabs_[4].Init(Tile.tileSize * 2, -Tile.tileSize * 0,false));
-        tileGrid_[0, 4] = Instantiate (tilePrefabs_[4].Init(Tile.tileSize * 4, -Tile.tileSize * 0,false));
-        // E
-        tileGrid_[2, 6] = Instantiate (tilePrefabs_[5].Init(Tile.tileSize * 6, -Tile.tileSize * 2,false));
-        tileGrid_[4, 6] = Instantiate (tilePrefabs_[5].Init(Tile.tileSize * 6, -Tile.tileSize * 4,false));
-        // S
-        tileGrid_[6, 2] = Instantiate (tilePrefabs_[6].Init(Tile.tileSize * 2, -Tile.tileSize * 6,false));
-        tileGrid_[6, 4] = Instantiate (tilePrefabs_[6].Init(Tile.tileSize * 4, -Tile.tileSize * 6,false));
-        // W
-        tileGrid_[2, 0] = Instantiate (tilePrefabs_[7].Init(Tile.tileSize * 0, -Tile.tileSize * 2,false));
-        tileGrid_[4, 0] = Instantiate (tilePrefabs_[7].Init(Tile.tileSize * 0, -Tile.tileSize * 4,false));
+        // North & South
+        for (int col = 2; col < rightIndex; col += 2)
+        {
+            tileGrid_[0          , col] = Instantiate (tilePrefabs_[4].Init(Tile.tileSize * col, -Tile.tileSize * 0          ,false));  // N
+            tileGrid_[bottomIndex, col] = Instantiate (tilePrefabs_[6].Init(Tile.tileSize * col, -Tile.tileSize * bottomIndex,false));  // S
+        }
+        // East & West
+        for (int row = 2; row < bottomIndex; row += 2)
+        {
+            tileGrid_[row, rightIndex] = Instantiate (tilePrefabs_[5].Init(Tile.tileSize * rightIndex, -Tile.tileSize * row,false));  // E
+            tileGrid_[row, 0         ] = Instantiate (tilePrefabs_[7].Init(Tile.tileSize * 0         , -Tile.tileSize * row,false));  // W
+        }
 
-        // Central
-        tileGrid_[2, 2] = Instantiate (tilePrefabs_[4].Init(Tile.tileSize * 2, -Tile.tileSize * 2,false));  // NW
-        tileGrid_[2, 4] = Instantiate (tilePrefabs_[5].Init(Tile.tileSize * 4, -Tile.tileSize * 2,false));  // NE
-        tileGrid_[4, 2] = Instantiate (tilePrefabs_[6].Init(Tile.tileSize * 2, -Tile.tileSize * 4,false));  // SW
-        tileGrid_[4, 4] = Instantiate (tilePrefabs_[7].Init(Tile.tileSize * 4, -Tile.tileSize * 4,false));  // SE
+        // Central pieces
+        for (int row = 2; row < bottomIndex; row += 2) 
+        {
+            for (int col = 2; col < rightIndex; col += 2)
+            {
+                int randomTJunt = Random.Range(4, 8);
+                tileGrid_[row, col] = Instantiate (tilePrefabs_[randomTJunt].Init(Tile.tileSize * col, -Tile.tileSize * row,false));
+            }
+        }
     }
 
+    // Populate the remaining tile spaces with a random choice of tiles
     void RandomiseMoveableTiles()
     {
-        for (int row = 0; row < mapSize.y; row++)
+        for (int row = 0; row < mapSizeVertical; row++)
         {
-            for (int col = 0; col < mapSize.x; col++)
+            for (int col = 0; col < mapSizeHorizontal; col++)
             {
                 if (tileGrid_[row, col] == null)
                 {
@@ -86,16 +108,21 @@ public class Map : MonoBehaviour
         }
     }
 
+    // Centre the tiles within the Map GameObject and scale to fit camera
     void PositionMap()
     {
         foreach (Tile tile in tileGrid_)
         {
+            // Parent the tile into the Map GameObject
             tile.transform.parent = this.transform;
-            float horizontalPos = Tile.tileSize * -mapSize.x * 0.5f + mapSize.x * 0.5f;
-            float verticalPos = Tile.tileSize * mapSize.y * 0.5f - mapSize.y * 0.5f;
+
+            // Shift the tile by half the map's height and width plus adjust for the tile axis being at it's centre
+            float horizontalPos = (Tile.tileSize * -mapSizeHorizontal * 0.5f) + (Tile.tileSize * 0.5f);
+            float verticalPos = (Tile.tileSize * mapSizeVertical * 0.5f) - (Tile.tileSize * 0.5f);
             tile.transform.Translate(new Vector3(horizontalPos, verticalPos, 0));
         }
 
+        // Scale the map TODO Avoid hardcoded value here
         transform.localScale = Vector3.one * 2;
     }
 
