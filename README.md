@@ -18,6 +18,6 @@ This is the code repository for Stage 2 of the Search for a Star & Sumo Digital 
 ### Who do I talk to? ###
 
 * Support information & FAQ, as well as the full project brief, can be found on the itch.io community page for the projects;
-* Search For A Star Support : [https://itch.io/jam/search-for-a-star-2017/community](Link URL)
-* Sumo Digital Rising Star Support : [https://itch.io/jam/sumo-digital-rising-star-2017/community](Link URL)
+* Search For A Star Support : https://itch.io/jam/search-for-a-star-2017/community
+* Sumo Digital Rising Star Support : https://itch.io/jam/sumo-digital-rising-star-2017/community
 * If you have any questions about the project or competition contact Aardvark Swift / Grads In Games at info@gradsingames.com or call us on 01709834777
