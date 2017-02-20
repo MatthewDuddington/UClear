@@ -74,6 +74,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4456661060319620}
   - component: {fileID: 114742635853292530}
+  - component: {fileID: 65458704046046340}
   m_Layer: 0
   m_Name: TJunc_NSW
   m_TagString: Untagged
@@ -358,6 +359,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!65 &65458704046046340
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1867706808976426}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 7, y: 7, z: 1}
+  m_Center: {x: 0, y: 0, z: -0.5}
 --- !u!65 &65591475864798058
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -381,4 +394,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43914386682cc4a65aef17cb32467e59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilePrefabs_: []

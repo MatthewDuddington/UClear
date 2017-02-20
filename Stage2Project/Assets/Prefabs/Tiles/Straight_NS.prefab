@@ -38,6 +38,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4646319870325204}
   - component: {fileID: 114269052444929894}
+  - component: {fileID: 65173101919140142}
   m_Layer: 0
   m_Name: Straight_NS
   m_TagString: Untagged
@@ -276,6 +277,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!65 &65173101919140142
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1473889691258010}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 7, y: 7, z: 1}
+  m_Center: {x: 0, y: 0, z: -0.5}
 --- !u!65 &65335556420299386
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -299,4 +312,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43914386682cc4a65aef17cb32467e59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilePrefabs_: []

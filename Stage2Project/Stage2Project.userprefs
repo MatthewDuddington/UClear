@@ -4,13 +4,13 @@
     <Files>
       <File FileName="Assets/Scripts/WrapPosition.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/RandomStartPosition.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Arena.cs" Line="17" Column="1" />
+      <File FileName="Assets/Scripts/Arena.cs" Line="12" Column="53" />
       <File FileName="Assets/Scripts/CameraUtils.cs" Line="1" Column="1" />
       <File FileName="Assets/Scripts/FlockWithGroup.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Map.cs" Line="69" Column="1" />
-      <File FileName="Assets/Scripts/Tile.cs" Line="15" Column="39" />
+      <File FileName="Assets/Scripts/Map.cs" Line="196" Column="46" />
+      <File FileName="Assets/Scripts/Tile.cs" Line="26" Column="6" />
       <File FileName="Assets/Scripts/ScreenManager.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Player.cs" Line="25" Column="24" />
+      <File FileName="Assets/Scripts/Player.cs" Line="33" Column="70" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
