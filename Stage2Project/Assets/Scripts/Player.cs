@@ -15,7 +15,7 @@ public class Player : MonoBehaviour
         mBody = GetComponent<Rigidbody>();
     }
 
-    void Update()
+    void FixedUpdate()  // Changed to FixedUpdate as influencing Rigidbody
     {
         Vector3 direction = Vector3.zero;
 
@@ -30,6 +30,7 @@ public class Player : MonoBehaviour
             direction += Input.GetAxisRaw("Vertical") * Vector3.forward;
         }
 
+        // Maintaining use of Rigidbody force rather than Translation
         mBody.velocity = (direction * Speed);
     }
 }

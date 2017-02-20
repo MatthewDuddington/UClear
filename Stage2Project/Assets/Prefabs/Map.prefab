@@ -51,7 +51,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea5d67db256d44d07a0e3e873cdcea9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tilePrefabs_:
+  mapSizeHorizontal: 13
+  mapSizeVertical: 7
+  TilePrefabs:
   - {fileID: 114341883950070182, guid: 12c10ad9cdde44c17b22827c796837eb, type: 2}
   - {fileID: 114362264176938454, guid: 8d6a2f536955e4605987f138189a8570, type: 2}
   - {fileID: 114196766944079594, guid: ddba31fa4dadb4783bc44260eab5f8f8, type: 2}
@@ -63,5 +65,3 @@ MonoBehaviour:
   - {fileID: 114956063638090438, guid: c7c3878e4ad904707a7f8de62a0cc922, type: 2}
   - {fileID: 114269052444929894, guid: 536c413e88f834b2dbc2ab9d827f5a49, type: 2}
   - {fileID: 114899366882058216, guid: d979596ca135540ab9f8f39ce38471be, type: 2}
-  mapSizeHorizontal: 7
-  mapSizeVertical: 7
