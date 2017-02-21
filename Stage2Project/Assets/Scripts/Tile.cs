@@ -4,62 +4,67 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    public enum Direction { Left, Right, Up, Down, Lift }
+    public enum Direction { Left, Right, Up, Down }
 
     public static int Size { get { return 7; } }
+    public static float moveDistance { get { return Size * 2; } }
+    public static float LiftDistance { get { return Size * 0.7f; } }
 
     public static Tile ActiveTile;
 
-    private static float slideTime = 1.5f;  // Time for tiles to take when moving during a slide
-    private static bool isSliding = false;
+    private static float slideTime = 0.5f;  // Time for tiles to take when moving during a slide
+    private static bool areSliding = false;
 
     public bool IsMovable  { get; private set; }
     public bool IsEdgeTile { get; private set; }
+
     public GridIndex Index { get; private set; }
 
     private MeshRenderer mRenderer;
     private static Material mainMaterial;
     private static Material hoverMaterial;
 
+    private Rigidbody mBody;
+
     void Awake()
     {
         mRenderer = transform.FindChild("Floor").gameObject.GetComponent<MeshRenderer>();   
         mainMaterial = Resources.Load<Material>("TileMainMaterial");
         hoverMaterial = Resources.Load<Material>("TileHoverMaterial");
+        mBody = gameObject.GetComponent<Rigidbody>();
     }
 
     public Tile Init (int row, int col, bool isMovable, bool isEdgeTile)
     {
         transform.position = new Vector3 (Size * col, 0, Size * -row);
-        Index.SetRow(row);
-        Index.SetCol(col);
+        Index = Index.SetRow(row);
+        Index = Index.SetCol(col);
         IsMovable = isMovable;
         IsEdgeTile = isEdgeTile;
-//      print("IsMovable" + isMovable + IsMovable + "IsEdge" + isEdgeTile + IsEdgeTile);
+
+        if (!IsMovable)
+        {
+//            GameObject.Destroy(gameObject.GetComponent<BoxCollider>());
+            GameObject.Destroy(gameObject.GetComponent<Rigidbody>());
+        }
         return this;
     }
 
     // Simple hover indication for now TODO Use an outline instead
     void OnMouseEnter()
     {
-//      print("enter");
         if (IsEdgeTile && IsMovable) { mRenderer.material = hoverMaterial; }
     }
 
     void OnMouseExit()
     {
-//      print("exit");
-        if (ActiveTile != this) { mRenderer.material = mainMaterial; }
+        if (mRenderer.material != mainMaterial && ActiveTile != this) { mRenderer.material = mainMaterial; }
     }
 
     // Clicking on moveable tiles slides that row or column by a tile
     void OnMouseDown()
     {
-//      print("click");
-        print(IsEdgeTile);
-        print(IsMovable);
-
-        if (isSliding) { Debug.LogWarning("Already sliding, ignorning click"); return; }  // Ignore clicks when already processign a slide
+        if (areSliding) { Debug.LogWarning("Already sliding, ignorning click"); return; }  // Ignore clicks when already processign a slide
 
         if (ActiveTile == this)  // Second click moves the tile
         {
@@ -67,10 +72,8 @@ public class Tile : MonoBehaviour
         }
         else if (IsEdgeTile)
         {
-//          print("edge tile");
             if (IsMovable)
             {
-//              print("moveable");
                 ActiveTile = this;  // First click sets the tile as active
                 // TODO Sound
             }
@@ -78,54 +81,95 @@ public class Tile : MonoBehaviour
     }
 
     // Public facing interface for the coroutine
-    public void Slide(Direction direction)
+    public void Slide(Direction direction, bool shouldLift = false)
     {
-        StartCoroutine(Co_Slide(direction));
+        if (shouldLift) { StartCoroutine(Co_Lift(direction)); }
+        else { StartCoroutine(Co_Slide(direction)); }
     }
 
     // Slides the tile in the specified direction
     private IEnumerator Co_Slide(Direction direction)
     {
+        float endTime = Time.time + slideTime;
+
         switch (direction)
         {
             case Direction.Down:
             {
-                transform.Translate(Vector3.down * Size);
-                Index.SetRow(Index.Row + 1);
-                if (Index.Row > Map.Get.MapSizeVertical - 1) { Index.SetRow(0); }
+//                while (Time.time < endTime);
+//                {
+//                    mBody.MovePosition(transform.position + (Vector3.down * moveDistance) * Time.fixedDeltaTime);
+//                    yield return new WaitForFixedUpdate();
+//                }
+                transform.Translate(Vector3.down * moveDistance);
+                Index = Index.SetRow(Index.Row + 1);
                 break;
             }
             case Direction.Up:
             {
-                transform.Translate(Vector3.up * Size);
-                Index.SetRow(Index.Row - 1);
-                if (Index.Row < 0) { Index.SetRow(Map.Get.MapSizeVertical - 1); }
+                transform.Translate(Vector3.up * moveDistance);
+                Index = Index.SetRow(Index.Row - 1);
                 break;
             }
             case Direction.Right:
             {
-                transform.Translate(Vector3.right * Size);
-                Index.SetRow(Index.Col + 1);
-                if (Index.Col > Map.Get.MapSizeHorizontal - 1) { Index.SetCol(0); }
+                transform.Translate(Vector3.right * moveDistance);
+                Index = Index.SetCol(Index.Col + 1);
                 break;
             }
             case Direction.Left:
             {
-                transform.Translate(Vector3.left * Size);
-                Index.SetRow(Index.Col - 1);
-                if (Index.Col < 0) { Index.SetCol(Map.Get.MapSizeHorizontal - 1); }
-                break;
-            }
-            case Direction.Lift:
-            {
-                isSliding = true;  // Prevent other movement attempts until finished
-                transform.Translate(Vector3.back * 3);
-                yield return new WaitForSeconds(slideTime / 2);
-                transform.Translate(Vector3.forward * 3);
-                isSliding = false;
+                transform.Translate(Vector3.left * moveDistance);
+                Index = Index.SetCol(Index.Col - 1);
                 break;
             }
         }
+
+        if (Index.Row == 0 || Index.Col == 0 || Index.Row == Map.Get.MapSizeVertical - 1 || Index.Col == Map.Get.MapSizeHorizontal - 1) { IsEdgeTile = true; }
+        else { IsEdgeTile = false; }
+
+        yield return new WaitForSeconds(slideTime);  // TODO Lerp these movements
     }
 
+    private IEnumerator Co_Lift(Direction direction)
+    {
+        areSliding = true;  // Prevent other movement attempts until finished
+
+        switch (direction)
+        {
+            case Direction.Down:
+            {
+                transform.Translate(Vector3.back * LiftDistance);
+                transform.Translate(Vector3.up * moveDistance * (Map.Get.MapSizeVertical - 1));
+                Index = Index.SetRow(0);
+                break;
+            }
+            case Direction.Up:
+            {
+                transform.Translate(Vector3.back * LiftDistance);
+                transform.Translate(Vector3.down * moveDistance * (Map.Get.MapSizeVertical - 1));
+                Index = Index.SetRow(Map.Get.MapSizeVertical - 1);
+                break;
+            }
+            case Direction.Right:
+            {
+                transform.Translate(Vector3.back * LiftDistance);
+                transform.Translate(Vector3.left * moveDistance * (Map.Get.MapSizeHorizontal - 1));
+                Index = Index.SetCol(0);
+                break;
+            }
+            case Direction.Left:
+            {
+                transform.Translate(Vector3.back * LiftDistance);
+                transform.Translate(Vector3.right * moveDistance * (Map.Get.MapSizeHorizontal - 1));
+                Index = Index.SetCol(Map.Get.MapSizeHorizontal - 1);
+                break;
+            }
+        }
+
+        yield return new WaitForSeconds(slideTime);  // TODO Lerp these movements
+        transform.Translate(Vector3.forward * LiftDistance);
+
+        areSliding = false;
+    }
 }

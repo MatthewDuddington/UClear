@@ -187,7 +187,7 @@ MonoBehaviour:
   PlayerPrefab: {fileID: 114645105814637946, guid: 7ad876dc80acfcd48a1fd4b15250b137,
     type: 2}
   Arena: {fileID: 1877346107}
-  TimeBetweenSpawns: 5
+  TimeBetweenSpawns: 1
 --- !u!4 &1236782920
 Transform:
   m_ObjectHideFlags: 0
@@ -301,18 +301,18 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 114987587135529442, guid: 8b2cc18d35b6d49cfbcf42c9a39ae037,
         type: 2}
-      propertyPath: mapSize.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114987587135529442, guid: 8b2cc18d35b6d49cfbcf42c9a39ae037,
-        type: 2}
-      propertyPath: mapSize.y
-      value: 0
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114987587135529442, guid: 8b2cc18d35b6d49cfbcf42c9a39ae037,
         type: 2}
       propertyPath: mapSizeHorizontal
-      value: 13
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 114987587135529442, guid: 8b2cc18d35b6d49cfbcf42c9a39ae037,
+        type: 2}
+      propertyPath: mapSizeVertical
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8b2cc18d35b6d49cfbcf42c9a39ae037, type: 2}

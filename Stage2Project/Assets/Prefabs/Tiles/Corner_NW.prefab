@@ -39,6 +39,7 @@ GameObject:
   - component: {fileID: 4449149103744864}
   - component: {fileID: 114425000792880258}
   - component: {fileID: 65145970554908670}
+  - component: {fileID: 54661650334782312}
   m_Layer: 0
   m_Name: Corner_NW
   m_TagString: Untagged
@@ -321,6 +322,21 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1998612801602344}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &54661650334782312
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1502316257761920}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!64 &64776393363151800
 MeshCollider:
   m_ObjectHideFlags: 1

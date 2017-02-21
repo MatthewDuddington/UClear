@@ -75,6 +75,7 @@ GameObject:
   - component: {fileID: 4456661060319620}
   - component: {fileID: 114742635853292530}
   - component: {fileID: 65458704046046340}
+  - component: {fileID: 54578765752725618}
   m_Layer: 0
   m_Name: TJunc_NSW
   m_TagString: Untagged
@@ -321,6 +322,21 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1090493518977114}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!54 &54578765752725618
+Rigidbody:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1867706808976426}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!64 &64932742838984016
 MeshCollider:
   m_ObjectHideFlags: 1

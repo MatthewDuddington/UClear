@@ -7,8 +7,30 @@ public struct GridIndex
     public int Row { get; private set; }
     public int Col { get; private set; }
 
-    public void SetRow(int rowIndex) { Row = rowIndex; }
-    public void SetCol(int colIndex) { Col = colIndex; }
+    /// <summary>
+    /// Returns a copy of the GridIndex with an updated row.
+    /// You MUST assign the returned copy back to the original variable to avoid pass by value nullification.
+    /// </summary>
+    public GridIndex SetRow(int rowIndex)
+    {
+        Row = rowIndex;
+        return this;
+    }
+    /// <summary>
+    /// Returns a copy of the GridIndex with an updated column.
+    /// You MUST assign the returned copy back to the original variable to avoid pass by value nullification.
+    /// </summary>
+    public GridIndex SetCol(int colIndex)
+    {
+        Col = colIndex;
+        return this;
+    }
+
+    public GridIndex(int row, int col)
+    {
+        Row = row;
+        Col = col;
+    }
 }
 
 public class Map : MonoBehaviour
@@ -128,7 +150,7 @@ public class Map : MonoBehaviour
                 {
                     int randomTile = Random.Range(0, TilePrefabs.Length);
                     bool isEdgeTile = false;
-                    if (row == 0 || col == 0 || row == MapSizeVertical - 1 || col == MapSizeHorizontal - 1) { isEdgeTile = true; print("true edge"); }
+                    if (row == 0 || col == 0 || row == MapSizeVertical - 1 || col == MapSizeHorizontal - 1) { isEdgeTile = true; }
                     tileGrid[row, col] = Instantiate (TilePrefabs[randomTile]).Init(row, col, true, isEdgeTile);
                 }
             }
@@ -157,14 +179,14 @@ public class Map : MonoBehaviour
     {
         Tile[] tiles;
         Tile.Direction direction;
-
+        
         // Add in reverse order, references to the tiles to be moved
         if (initiatingTileIndex.Row == 0)  // Top edge
         {
             tiles = new Tile[MapSizeVertical];
             for (int i = 0; i < MapSizeVertical; i++)
             {
-                tiles[i] = tileGrid[0, (MapSizeVertical - 1) - i];
+                tiles[i] = tileGrid[(MapSizeVertical - 1) - i, initiatingTileIndex.Col];
             }
             direction = Tile.Direction.Down;
         }
@@ -173,7 +195,7 @@ public class Map : MonoBehaviour
             tiles = new Tile[MapSizeVertical];
             for (int i = 0; i < MapSizeVertical; i++)
             {
-                tiles[i] = tileGrid[0, i];
+                tiles[i] = tileGrid[i, initiatingTileIndex.Col];
             }
             direction = Tile.Direction.Up;
         }
@@ -182,7 +204,7 @@ public class Map : MonoBehaviour
             tiles = new Tile[MapSizeHorizontal];
             for (int i = 0; i < MapSizeHorizontal; i++)
             {
-                tiles[i] = tileGrid[(MapSizeHorizontal - 1) - i, 0];
+                tiles[i] = tileGrid[initiatingTileIndex.Row, (MapSizeHorizontal - 1) - i];
             }
             direction = Tile.Direction.Right;
         }
@@ -191,16 +213,20 @@ public class Map : MonoBehaviour
             tiles = new Tile[MapSizeHorizontal];
             for (int i = 0; i < MapSizeHorizontal; i++)
             {
-                tiles[i] = tileGrid[i, 0];
+                tiles[i] = tileGrid[initiatingTileIndex.Row, i];
             }
             direction = Tile.Direction.Left;
         }
 
-        tiles[0].Slide(Tile.Direction.Lift);  // Lift up the tile to move over to the end
+        // Lift up the tile to move over to the end
+        tiles[0].Slide(direction, true);  // Updates the tile's row and col index...
+        tileGrid[tiles[0].Index.Row, tiles[0].Index.Col] = tiles[0];  // ...so this will update accordingly
+
+        // Slide along the other tiles
         for (int i = 1; i < tiles.Length; i++)
         {
-            tiles[i].Slide(direction);  // Updates the tile's row and col index...
-            tileGrid[tiles[i].Index.Row, tiles[i].Index.Col] = tiles[i];  // ...so this will update accordingly.
+            tiles[i].Slide(direction);
+            tileGrid[tiles[i].Index.Row, tiles[i].Index.Col] = tiles[i];
         }
     }
 }
