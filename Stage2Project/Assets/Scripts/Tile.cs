@@ -90,36 +90,51 @@ public class Tile : MonoBehaviour
     // Slides the tile in the specified direction
     private IEnumerator Co_Slide(Direction direction)
     {
-        float endTime = Time.time + slideTime;
+        float endTime = Time.fixedTime + slideTime;
 
         switch (direction)
         {
             case Direction.Down:
             {
-//                while (Time.time < endTime);
-//                {
-//                    mBody.MovePosition(transform.position + (Vector3.down * moveDistance) * Time.fixedDeltaTime);
-//                    yield return new WaitForFixedUpdate();
-//                }
-                transform.Translate(Vector3.down * moveDistance);
+                while (Time.fixedTime < endTime)
+                {
+                    mBody.MovePosition(transform.position + ((Vector3.back * moveDistance * 2) * Time.fixedDeltaTime));
+                    yield return new WaitForFixedUpdate();
+                }
+//                transform.Translate(Vector3.down * moveDistance);
                 Index = Index.SetRow(Index.Row + 1);
                 break;
             }
             case Direction.Up:
             {
-                transform.Translate(Vector3.up * moveDistance);
+                while (Time.fixedTime < endTime)
+                {
+                    mBody.MovePosition(transform.position + ((Vector3.forward * moveDistance * 2) * Time.fixedDeltaTime));
+                    yield return new WaitForFixedUpdate();
+                }
+//                transform.Translate(Vector3.up * moveDistance);
                 Index = Index.SetRow(Index.Row - 1);
                 break;
             }
             case Direction.Right:
             {
-                transform.Translate(Vector3.right * moveDistance);
+                while (Time.fixedTime < endTime)
+                {
+                    mBody.MovePosition(transform.position + ((Vector3.right * moveDistance * 2) * Time.fixedDeltaTime));
+                    yield return new WaitForFixedUpdate();
+                }
+//                transform.Translate(Vector3.right * moveDistance);
                 Index = Index.SetCol(Index.Col + 1);
                 break;
             }
             case Direction.Left:
             {
-                transform.Translate(Vector3.left * moveDistance);
+                while (Time.fixedTime < endTime)
+                {
+                    mBody.MovePosition(transform.position + ((Vector3.left * moveDistance * 2) * Time.fixedDeltaTime));
+                    yield return new WaitForFixedUpdate();
+                }
+//                transform.Translate(Vector3.left * moveDistance);
                 Index = Index.SetCol(Index.Col - 1);
                 break;
             }
@@ -135,12 +150,30 @@ public class Tile : MonoBehaviour
     {
         areSliding = true;  // Prevent other movement attempts until finished
 
+        float endTime = Time.fixedTime + (slideTime * 0.5f);
+
         switch (direction)
         {
             case Direction.Down:
             {
-                transform.Translate(Vector3.back * LiftDistance);
-                transform.Translate(Vector3.up * moveDistance * (Map.Get.MapSizeVertical - 1));
+                while (Time.fixedTime < endTime)
+                {
+                    mBody.MovePosition(transform.position + ((Vector3.up * LiftDistance * 2) * Time.fixedDeltaTime));
+                    mBody.MovePosition(transform.position + ((Vector3.forward * (Map.Get.MapSizeVertical - 1) * 2) * Time.fixedDeltaTime));
+                    yield return new WaitForFixedUpdate();
+                }
+
+                endTime = Time.fixedTime + (slideTime * 0.5f);
+
+                while (Time.fixedTime < endTime)
+                {
+                    mBody.MovePosition(transform.position + ((Vector3.down * LiftDistance * 2) * Time.fixedDeltaTime));
+                    mBody.MovePosition(transform.position + ((Vector3.forward * (Map.Get.MapSizeVertical - 1) * 2) * Time.fixedDeltaTime));
+                    yield return new WaitForFixedUpdate();
+                }
+
+//                transform.Translate(Vector3.back * LiftDistance);
+//                transform.Translate(Vector3.up * moveDistance * (Map.Get.MapSizeVertical - 1));
                 Index = Index.SetRow(0);
                 break;
             }
@@ -166,9 +199,6 @@ public class Tile : MonoBehaviour
                 break;
             }
         }
-
-        yield return new WaitForSeconds(slideTime);  // TODO Lerp these movements
-        transform.Translate(Vector3.forward * LiftDistance);
 
         areSliding = false;
     }
