@@ -27,6 +27,8 @@ public class Tile : MonoBehaviour
 
     private WaitForFixedUpdate waitForFixedUpdate;
 
+    private GameObject[] doors;
+
     void Awake()
     {
         mRenderer = transform.FindChild("Floor").gameObject.GetComponent<MeshRenderer>();   
@@ -34,6 +36,7 @@ public class Tile : MonoBehaviour
         hoverMaterial = Resources.Load<Material>("TileHoverMaterial");
         mBody = gameObject.GetComponent<Rigidbody>();
         waitForFixedUpdate = new WaitForFixedUpdate();
+        LoadDoors();
     }
 
     public Tile Init (int row, int col, bool isMovable, bool isEdgeTile)
@@ -93,9 +96,9 @@ public class Tile : MonoBehaviour
     // Slides the tile in the specified direction
     private IEnumerator Co_Slide(Direction direction)
     {
-        Vector3 directionPart = Vector3.zero;
-
         // Check which direction to move tile in and set new index values BEFORE any yielding
+        Vector3 directionPart = Vector3.zero;  // Store the Vertical / Horizontal movement component
+
         switch (direction)
         {
             case Direction.Down:
@@ -125,7 +128,10 @@ public class Tile : MonoBehaviour
         }
 
         // Recheck edge tiles
-        if (Index.Row == 0 || Index.Col == 0 || Index.Row == Map.Get.MapSizeVertical - 1 || Index.Col == Map.Get.MapSizeHorizontal - 1) { IsEdgeTile = true; }
+        if (Index.Row == 0 || Index.Col == 0 || Index.Row == Map.Get.MapSizeVertical - 1 || Index.Col == Map.Get.MapSizeHorizontal - 1)
+        { 
+            IsEdgeTile = true;
+        }
         else { IsEdgeTile = false; }
         
         // Slide tile along row / column
@@ -154,9 +160,9 @@ public class Tile : MonoBehaviour
     {
         areSliding = true;  // Prevent other movement attempts until finished
 
+        // Check which movement direction to store and set new index values BEFORE any yielding
         Vector3 directionPart = Vector3.zero;  // Store the Vertical / Horizontal movement component
 
-        // Check which movement direction to store and set new index values BEFORE any yielding
         switch (direction)
         {
             case Direction.Down:
@@ -192,6 +198,8 @@ public class Tile : MonoBehaviour
         // Lift and slide tile to start of row / column
         Vector3 liftPart = Vector3.zero;  // Store the Up / Down movement component
 
+        ToggleAllDoors();  // Close the doors for takeoff
+
         float endTime = Time.fixedTime + (slideTime * 0.5f);  // Set up half the time for the first movement
         while (Time.fixedTime < endTime)
         {
@@ -208,6 +216,8 @@ public class Tile : MonoBehaviour
             yield return waitForFixedUpdate;
         }
 
+        ToggleAllDoors();  // Reopen doors after landing
+
         // Fix any transform drift
         float horizontalDrift = transform.position.x % moveDistance;
         if (horizontalDrift >= Size) { horizontalDrift = moveDistance - horizontalDrift; }
@@ -221,5 +231,67 @@ public class Tile : MonoBehaviour
         mBody.MovePosition(transform.position - transformDrift);
 
         areSliding = false;  // Re-enable other movements
+    }
+
+    // Check to see which edges have doors and store references 
+    private void LoadDoors()
+    {
+        doors = new GameObject[4];
+        Transform checkDoor;
+        checkDoor = transform.FindChild("Door_N");
+        if (checkDoor != null) { doors[(int) Direction.Up] = checkDoor.gameObject; }
+        checkDoor = transform.FindChild("Door_E");
+        if (checkDoor != null) { doors[(int) Direction.Right] = checkDoor.gameObject; }
+        checkDoor = transform.FindChild("Door_S");
+        if (checkDoor != null) { doors[(int) Direction.Down] = checkDoor.gameObject; }
+        checkDoor = transform.FindChild("Door_W");
+        if (checkDoor != null) { doors[(int) Direction.Left] = checkDoor.gameObject; }
+
+        ToggleAllDoors();  // Turn off all doors at the start
+    }
+
+    // Close / open a door on a tile edge direction
+    private void ToggleDoor(Direction direction, bool shouldBeClosed)
+    {
+        switch (direction)
+        {
+            case Direction.Up:
+            {
+                if (doors[(int) Direction.Up] != null) { doors[(int) Direction.Up].SetActive(shouldBeClosed); }
+                break;
+            }
+            case Direction.Down:
+            {
+                if (doors[(int) Direction.Right] != null) { doors[(int) Direction.Right].SetActive(shouldBeClosed); }
+                break;
+            }
+            case Direction.Left:
+            {
+                if (doors[(int) Direction.Down] != null) { doors[(int) Direction.Down].SetActive(shouldBeClosed); }
+                break;
+            }
+            case Direction.Right:
+            {
+                if (doors[(int) Direction.Left] != null) { doors[(int) Direction.Left].SetActive(shouldBeClosed); }
+                break;
+            }
+        }
+    }
+
+    // Shortcut for toggling all potential doors on a tile
+    private void ToggleAllDoors(bool shouldBeClosed)
+    {
+        ToggleDoor(Direction.Up,    shouldBeClosed);
+        ToggleDoor(Direction.Right, shouldBeClosed);
+        ToggleDoor(Direction.Down,  shouldBeClosed);
+        ToggleDoor(Direction.Left,  shouldBeClosed);
+    }
+
+    private void ToggleAllDoors()
+    {
+        ToggleDoor(Direction.Up,    !doors[(int) Direction.Up].activeSelf);
+        ToggleDoor(Direction.Right, !doors[(int) Direction.Right].activeSelf);
+        ToggleDoor(Direction.Down,  !doors[(int) Direction.Down].activeSelf);
+        ToggleDoor(Direction.Left,  !doors[(int) Direction.Left].activeSelf);
     }
 }
