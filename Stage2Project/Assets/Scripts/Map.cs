@@ -41,7 +41,10 @@ public class Map : MonoBehaviour
     { 
         get
         {
-            if (map_ == null) { Debug.LogError("No Map present in scene"); }
+            if (map_ == null)
+            {
+                Debug.LogError("No Map present in scene");
+            }
             return map_;
         }
         private set { map_ = value; }
@@ -70,10 +73,12 @@ public class Map : MonoBehaviour
     public int MapSizeVertical   { get { return mapSizeVertical; } }
 
     [SerializeField]
-    private Tile[] TilePrefabs;
+    private Tile [] TilePrefabs;
 
     // A grid of Z rows * X cols map tiles
-    private Tile[,] tileGrid;
+    private Tile [,] tileGrid;
+
+    public Vector3 AgentSpawnLocation { get; private set; }
 
     void Awake()
     {
@@ -92,6 +97,7 @@ public class Map : MonoBehaviour
             mapSizeVertical ++;
         }
 
+        // Setup size of tile grid 2D array
         tileGrid = new Tile[(int) MapSizeVertical, (int) MapSizeHorizontal];
     }
 
@@ -100,10 +106,11 @@ public class Map : MonoBehaviour
         AddDefaultTiles();
         RandomiseMoveableTiles();
         PositionMap();
+        RandomiseGameLocations();
     }
 
     // Add the fixed corner, edge and central tiles
-    void AddDefaultTiles()
+    private void AddDefaultTiles()
     {
         int cMax = MapSizeHorizontal - 1;  // Maximum col index
         int rMax = MapSizeVertical - 1;    // Maximum row index
@@ -140,7 +147,7 @@ public class Map : MonoBehaviour
     }
 
     // Populate the remaining tile spaces with a random choice of tiles
-    void RandomiseMoveableTiles()
+    private void RandomiseMoveableTiles()
     {
         for (int row = 0; row < MapSizeVertical; row++)
         {
@@ -150,7 +157,13 @@ public class Map : MonoBehaviour
                 {
                     int randomTile = Random.Range(0, TilePrefabs.Length);
                     bool isEdgeTile = false;
-                    if (row == 0 || col == 0 || row == MapSizeVertical - 1 || col == MapSizeHorizontal - 1) { isEdgeTile = true; }
+                    if (  row == 0 
+                       || col == 0 
+                       || row == MapSizeVertical - 1 
+                       || col == MapSizeHorizontal - 1)
+                    {
+                        isEdgeTile = true;
+                    }
                     tileGrid[row, col] = Instantiate (TilePrefabs[randomTile]).Init(row, col, true, isEdgeTile);
                 }
             }
@@ -158,7 +171,7 @@ public class Map : MonoBehaviour
     }
 
     // Centre the tiles within the Map GameObject and scale to fit camera
-    void PositionMap()
+    private void PositionMap()
     {
         foreach (Tile tile in tileGrid)
         {
@@ -173,6 +186,51 @@ public class Map : MonoBehaviour
 
         // Scale the map TODO Avoid hardcoded value here
         transform.localScale = Vector3.one * 2;
+    }
+
+    // Randomise location of Agent spawn and Decontamination in oposite corners
+    private void RandomiseGameLocations()
+    {
+        int randomCornerIndex = Random.Range(0, 4);
+        Tile spawnTile;
+        Tile cureTile;
+        switch (randomCornerIndex)
+        {
+            case 0:
+            {
+                spawnTile = tileGrid[0, 0];
+                cureTile = tileGrid[MapSizeVertical - 1, MapSizeHorizontal - 1];
+                break;
+            }
+            case 1:
+            {
+                spawnTile = tileGrid[0, MapSizeHorizontal - 1];
+                cureTile = tileGrid[MapSizeVertical - 1, 0];
+                break;
+            }
+            case 2:
+            {
+                spawnTile = tileGrid[MapSizeVertical - 1, 0];
+                cureTile = tileGrid[0, MapSizeHorizontal - 1];
+                break;
+            }
+            case 3:
+            {
+                spawnTile = tileGrid[MapSizeVertical - 1, MapSizeHorizontal - 1];
+                cureTile = tileGrid[0, 0];
+                break;
+            }
+            default:  // Should never reach here but compiler complains if spawnTile and cureTile are unassigned
+            {
+                spawnTile = new Tile();
+                cureTile = new Tile();
+                break;
+            }
+        }
+
+        AgentSpawnLocation = spawnTile.transform.position;
+        spawnTile.SetAsSpawnLocation();
+        cureTile.SetAsCureLocation();
     }
 
     public void SlideTiles(GridIndex initiatingTileIndex)
@@ -223,25 +281,37 @@ public class Map : MonoBehaviour
         if (direction == Tile.Direction.South || direction == Tile.Direction.East || direction == Tile.Direction.West)
         {
             tileGrid[tiles[0].Index.Row - 1, tiles[0].Index.Col].TriggerSafetyDoor(Tile.Direction.South);
-            if (direction != Tile.Direction.South) { tileGrid[tiles[tiles.Length - 1].Index.Row + 1, tiles[tiles.Length - 1].Index.Col].TriggerSafetyDoor(Tile.Direction.North); }
+            if (direction != Tile.Direction.South)
+            {
+                tileGrid[tiles[tiles.Length - 1].Index.Row + 1, tiles[tiles.Length - 1].Index.Col].TriggerSafetyDoor(Tile.Direction.North);
+            }
         }
         // Tile South of lifted and North of gap
         if (direction == Tile.Direction.North || direction == Tile.Direction.East || direction == Tile.Direction.West)
         {
             tileGrid[tiles[0].Index.Row + 1, tiles[0].Index.Col].TriggerSafetyDoor(Tile.Direction.North);
-            if (direction != Tile.Direction.North) { tileGrid[tiles[tiles.Length - 1].Index.Row - 1, tiles[tiles.Length - 1].Index.Col].TriggerSafetyDoor(Tile.Direction.South); }
+            if (direction != Tile.Direction.North)
+            {
+                tileGrid[tiles[tiles.Length - 1].Index.Row - 1, tiles[tiles.Length - 1].Index.Col].TriggerSafetyDoor(Tile.Direction.South);
+            }
         }
         // Tile West of lifted and East of gap
         if (direction == Tile.Direction.East || direction == Tile.Direction.North || direction == Tile.Direction.South)
         {
             tileGrid[tiles[0].Index.Row, tiles[0].Index.Col - 1].TriggerSafetyDoor(Tile.Direction.East);
-            if (direction != Tile.Direction.East) { tileGrid[tiles[tiles.Length - 1].Index.Row, tiles[tiles.Length - 1].Index.Col + 1].TriggerSafetyDoor(Tile.Direction.West); }
+            if (direction != Tile.Direction.East)
+            {
+                tileGrid[tiles[tiles.Length - 1].Index.Row, tiles[tiles.Length - 1].Index.Col + 1].TriggerSafetyDoor(Tile.Direction.West);
+            }
         }
         // Tile East of lifted and West of gap
         if (direction == Tile.Direction.West || direction == Tile.Direction.North || direction == Tile.Direction.South)
         {
             tileGrid[tiles[0].Index.Row, tiles[0].Index.Col + 1].TriggerSafetyDoor(Tile.Direction.West);
-            if (direction != Tile.Direction.West) { tileGrid[tiles[tiles.Length - 1].Index.Row, tiles[tiles.Length - 1].Index.Col - 1].TriggerSafetyDoor(Tile.Direction.East); }
+            if (direction != Tile.Direction.West)
+            {
+                tileGrid[tiles[tiles.Length - 1].Index.Row, tiles[tiles.Length - 1].Index.Col - 1].TriggerSafetyDoor(Tile.Direction.East);
+            }
         }
 
         // Lift up the tile to move over to the end

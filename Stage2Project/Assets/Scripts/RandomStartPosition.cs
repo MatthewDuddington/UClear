@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class RandomStartPosition : MonoBehaviour
 {
+    // Not used in this game
+
 	void Start()
     {
         float hw = Arena.Width * 0.5f;

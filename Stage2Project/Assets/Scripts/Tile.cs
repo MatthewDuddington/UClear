@@ -19,17 +19,22 @@ public class Tile : MonoBehaviour
     public bool IsMovable  { get; private set; }
     public bool IsEdgeTile { get; private set; }
 
+    private bool IsSpawnTile = false;
+    private bool IsCureTile = false;
+
     private MeshRenderer mRenderer;
     private static Material mainMaterial;
     private static Material slideableMaterial;
     private static Material hoverMaterial;
+    private static Material spawnLocationMaterial;
+    private static Material cureLocationMaterial;
 
     private Rigidbody mBody;
 
     private WaitForFixedUpdate waitForFixedUpdate;
     private WaitForSeconds waitForSlideTime = new WaitForSeconds(slideTime);
 
-    private GameObject[] doors;
+    private GameObject [] doors;
 
     void Awake()
     {
@@ -37,6 +42,8 @@ public class Tile : MonoBehaviour
         mainMaterial = Resources.Load<Material>("TileMainMaterial");
         slideableMaterial = Resources.Load<Material>("TileSlideableMaterial");
         hoverMaterial = Resources.Load<Material>("TileHoverMaterial");
+        spawnLocationMaterial = Resources.Load<Material>("TileSpawnLocationMaterial");
+        cureLocationMaterial = Resources.Load<Material>("TileCureLocationMaterial");
 
         mBody = gameObject.GetComponent<Rigidbody>();
 
@@ -53,9 +60,15 @@ public class Tile : MonoBehaviour
         IsMovable = isMovable;
         IsEdgeTile = isEdgeTile;
 
-        if (!IsMovable) { GameObject.Destroy(gameObject.GetComponent<Rigidbody>()); }
+        if (!IsMovable)
+        {
+            GameObject.Destroy(gameObject.GetComponent<Rigidbody>());
+        }
 
-        if (IsMovable && IsEdgeTile) { mRenderer.material = slideableMaterial; }
+        if (IsMovable && IsEdgeTile)
+        {
+            mRenderer.material = slideableMaterial;
+        }
 
         return this;
     }
@@ -63,22 +76,36 @@ public class Tile : MonoBehaviour
     // Simple hover indication for now TODO Use an outline instead
     void OnMouseEnter()
     {
-        if (IsEdgeTile && IsMovable) { mRenderer.material = hoverMaterial; }
+        if (IsEdgeTile && IsMovable)
+        { 
+            mRenderer.material = hoverMaterial;
+        }
     }
 
     void OnMouseExit()
     {
         if (IsEdgeTile && IsMovable)
         {
-            if (mRenderer.material != mainMaterial && ActiveTile != this) { mRenderer.material = slideableMaterial; }
+            if (mRenderer.material != mainMaterial && ActiveTile != this)
+            { 
+                mRenderer.material = slideableMaterial;
+            }
         }
-        else { mRenderer.material = mainMaterial; }
+        else if (!IsSpawnTile && !IsCureTile)
+        { 
+            mRenderer.material = mainMaterial;
+        }
     }
 
     // Clicking on moveable tiles slides that row or column by a tile
     void OnMouseDown()
     {
-        if (areSliding) { Debug.LogWarning("Already sliding, ignorning click"); return; }  // Ignore clicks when already processign a slide
+        // Ignore clicks when already processign a slide
+        if (areSliding)
+        {
+            Debug.LogWarning("Already sliding, ignorning click");
+            return;
+        }
 
         if (ActiveTile == this)  // Second click moves the tile
         {
@@ -95,11 +122,31 @@ public class Tile : MonoBehaviour
         }
     }
 
+    // Set visual for Spawn tile
+    public void SetAsSpawnLocation()
+    {
+        mRenderer.material = spawnLocationMaterial;
+        IsSpawnTile = true;
+    }
+
+    // Set visual for Decontamination tile
+    public void SetAsCureLocation()
+    {
+        mRenderer.material = cureLocationMaterial;
+        IsCureTile = true;
+    }
+
     // Public facing interface for the slide coroutines
     public void Slide(Direction direction, bool shouldLift = false)
     {
-        if (shouldLift) { StartCoroutine(Co_Lift(direction)); }
-        else { StartCoroutine(Co_Slide(direction)); }
+        if (shouldLift)
+        {
+            StartCoroutine(Co_Lift(direction));
+        }
+        else
+        {
+            StartCoroutine(Co_Slide(direction));
+        }
     }
 
     // Slides the tile in the specified direction
@@ -137,11 +184,17 @@ public class Tile : MonoBehaviour
         }
 
         // Recheck edge tiles
-        if (Index.Row == 0 || Index.Col == 0 || Index.Row == Map.Get.MapSizeVertical - 1 || Index.Col == Map.Get.MapSizeHorizontal - 1)
-        { 
+        if (  Index.Row == 0
+           || Index.Col == 0
+           || Index.Row == Map.Get.MapSizeVertical - 1
+           || Index.Col == Map.Get.MapSizeHorizontal - 1)
+        {
             IsEdgeTile = true;
         }
-        else { IsEdgeTile = false; }
+        else
+        {
+            IsEdgeTile = false;
+        }
         
         // Slide tile along row / column
         float endTime = Time.fixedTime + slideTime;
@@ -153,18 +206,33 @@ public class Tile : MonoBehaviour
 
         // Fix any transform drift
         float horizontalDrift = transform.position.x % moveDistance;
-        if (horizontalDrift >= Size) { horizontalDrift = moveDistance - horizontalDrift; }
-        else if (horizontalDrift <= -Size) { horizontalDrift = -(moveDistance + horizontalDrift); }
+        if (horizontalDrift >= Size)
+        { 
+            horizontalDrift = moveDistance - horizontalDrift;
+        }
+        else if (horizontalDrift <= -Size)
+        { 
+            horizontalDrift = -(moveDistance + horizontalDrift);
+        }
 
         float verticalDrift = transform.position.z % moveDistance;
-        if (verticalDrift >= Size) { verticalDrift = moveDistance - verticalDrift; }
-        else if (verticalDrift <= -Size) { verticalDrift = -(moveDistance + verticalDrift); }
+        if (verticalDrift >= Size)
+        {
+            verticalDrift = moveDistance - verticalDrift;
+        }
+        else if (verticalDrift <= -Size)
+        {
+            verticalDrift = -(moveDistance + verticalDrift);
+        }
 
         Vector3 transformDrift = new Vector3(horizontalDrift, transform.position.y, verticalDrift);
         mBody.MovePosition(transform.position - transformDrift);
 
         // Set slideable colour for new edge tiles (
-        if (Index.Row == 0 || Index.Col == 0 || Index.Row == Map.Get.MapSizeVertical - 1 || Index.Col == Map.Get.MapSizeHorizontal - 1)
+        if (  Index.Row == 0 
+           || Index.Col == 0 
+           || Index.Row == Map.Get.MapSizeVertical - 1 
+           || Index.Col == Map.Get.MapSizeHorizontal - 1)
         { 
             mRenderer.material = slideableMaterial;
         }
@@ -207,8 +275,17 @@ public class Tile : MonoBehaviour
         }
 
         // Recheck edge tiles
-        if (Index.Row == 0 || Index.Col == 0 || Index.Row == Map.Get.MapSizeVertical - 1 || Index.Col == Map.Get.MapSizeHorizontal - 1) { IsEdgeTile = true; }
-        else { IsEdgeTile = false; }
+        if (  Index.Row == 0 
+           || Index.Col == 0
+           || Index.Row == Map.Get.MapSizeVertical - 1 
+           || Index.Col == Map.Get.MapSizeHorizontal - 1)
+        {
+            IsEdgeTile = true;
+        }
+        else
+        {
+            IsEdgeTile = false;
+        }
 
         // Lift and slide tile to start of row / column
         Vector3 liftPart = Vector3.zero;  // Store the Up / Down movement component
@@ -235,12 +312,24 @@ public class Tile : MonoBehaviour
 
         // Fix any transform drift
         float horizontalDrift = transform.position.x % moveDistance;
-        if (horizontalDrift >= Size) { horizontalDrift = moveDistance - horizontalDrift; }
-        else if (horizontalDrift <= -Size) { horizontalDrift = -(moveDistance + horizontalDrift); }
+        if (horizontalDrift >= Size)
+        {
+            horizontalDrift = moveDistance - horizontalDrift;
+        }
+        else if (horizontalDrift <= -Size)
+        {
+            horizontalDrift = -(moveDistance + horizontalDrift);
+        }
 
         float verticalDrift = transform.position.z % moveDistance;
-        if (verticalDrift >= Size) { verticalDrift = moveDistance - verticalDrift; }
-        else if (verticalDrift <= -Size) { verticalDrift = -(moveDistance + verticalDrift); }
+        if (verticalDrift >= Size)
+        {
+            verticalDrift = moveDistance - verticalDrift;
+        }
+        else if (verticalDrift <= -Size)
+        {
+            verticalDrift = -(moveDistance + verticalDrift);
+        }
 
         Vector3 transformDrift = new Vector3(horizontalDrift, transform.position.y, verticalDrift);
         mBody.MovePosition(transform.position - transformDrift);
@@ -253,14 +342,27 @@ public class Tile : MonoBehaviour
     {
         doors = new GameObject[4];
         Transform checkDoor;
+
         checkDoor = transform.FindChild("Door_N");
-        if (checkDoor != null) { doors[(int) Direction.North] = checkDoor.gameObject; }
+        if (checkDoor != null)
+        {
+            doors[(int) Direction.North] = checkDoor.gameObject;
+        }
         checkDoor = transform.FindChild("Door_E");
-        if (checkDoor != null) { doors[(int) Direction.East] = checkDoor.gameObject; }
+        if (checkDoor != null)
+        {
+            doors[(int) Direction.East] = checkDoor.gameObject;
+        }
         checkDoor = transform.FindChild("Door_S");
-        if (checkDoor != null) { doors[(int) Direction.South] = checkDoor.gameObject; }
+        if (checkDoor != null)
+        {
+            doors[(int) Direction.South] = checkDoor.gameObject;
+        }
         checkDoor = transform.FindChild("Door_W");
-        if (checkDoor != null) { doors[(int) Direction.West] = checkDoor.gameObject; }
+        if (checkDoor != null)
+        {
+            doors[(int) Direction.West] = checkDoor.gameObject;
+        }
 
         ToggleAllDoors(false);  // Turn off all doors at the start
     }
@@ -268,12 +370,18 @@ public class Tile : MonoBehaviour
     // Close / open a door on a specific tile edge direction
     private void ToggleDoor(Direction direction, bool shouldBeClosed)
     {
-        if (doors[(int) direction] != null) { doors[(int) direction].SetActive(shouldBeClosed); }
+        if (doors[(int) direction] != null)
+        {
+            doors[(int) direction].SetActive(shouldBeClosed);
+        }
     }
 
     private void ToggleDoor(Direction direction)
     {
-        if (doors[(int) direction] != null) { doors[(int) direction].SetActive(!doors[(int) direction].activeSelf); }
+        if (doors[(int) direction] != null)
+        {
+            doors[(int) direction].SetActive(!doors[(int) direction].activeSelf);
+        }
     }
 
     // Shortcut for toggling all potential doors on a tile
