@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    public enum Direction { Up, Right, Down, Left }
+    public enum Direction { North, East, South, West }
 
     public static int Size { get { return 7; } }
     public static float moveDistance { get { return Size * 2; } }
@@ -21,11 +21,13 @@ public class Tile : MonoBehaviour
 
     private MeshRenderer mRenderer;
     private static Material mainMaterial;
+    private static Material slideableMaterial;
     private static Material hoverMaterial;
 
     private Rigidbody mBody;
 
     private WaitForFixedUpdate waitForFixedUpdate;
+    private WaitForSeconds waitForSlideTime = new WaitForSeconds(slideTime);
 
     private GameObject[] doors;
 
@@ -33,9 +35,13 @@ public class Tile : MonoBehaviour
     {
         mRenderer = transform.FindChild("Floor").gameObject.GetComponent<MeshRenderer>();   
         mainMaterial = Resources.Load<Material>("TileMainMaterial");
+        slideableMaterial = Resources.Load<Material>("TileSlideableMaterial");
         hoverMaterial = Resources.Load<Material>("TileHoverMaterial");
+
         mBody = gameObject.GetComponent<Rigidbody>();
+
         waitForFixedUpdate = new WaitForFixedUpdate();
+
         LoadDoors();
     }
 
@@ -47,11 +53,10 @@ public class Tile : MonoBehaviour
         IsMovable = isMovable;
         IsEdgeTile = isEdgeTile;
 
-        if (!IsMovable)
-        {
-//            GameObject.Destroy(gameObject.GetComponent<BoxCollider>());
-            GameObject.Destroy(gameObject.GetComponent<Rigidbody>());
-        }
+        if (!IsMovable) { GameObject.Destroy(gameObject.GetComponent<Rigidbody>()); }
+
+        if (IsMovable && IsEdgeTile) { mRenderer.material = slideableMaterial; }
+
         return this;
     }
 
@@ -63,7 +68,11 @@ public class Tile : MonoBehaviour
 
     void OnMouseExit()
     {
-        if (mRenderer.material != mainMaterial && ActiveTile != this) { mRenderer.material = mainMaterial; }
+        if (IsEdgeTile && IsMovable)
+        {
+            if (mRenderer.material != mainMaterial && ActiveTile != this) { mRenderer.material = slideableMaterial; }
+        }
+        else { mRenderer.material = mainMaterial; }
     }
 
     // Clicking on moveable tiles slides that row or column by a tile
@@ -86,7 +95,7 @@ public class Tile : MonoBehaviour
         }
     }
 
-    // Public facing interface for the coroutines
+    // Public facing interface for the slide coroutines
     public void Slide(Direction direction, bool shouldLift = false)
     {
         if (shouldLift) { StartCoroutine(Co_Lift(direction)); }
@@ -101,25 +110,25 @@ public class Tile : MonoBehaviour
 
         switch (direction)
         {
-            case Direction.Down:
+            case Direction.South:
             {
                 Index = Index.SetRow(Index.Row + 1);  // Must do these before any yeild statements
                 directionPart = Vector3.back * moveDistance;
                 break;
             }
-            case Direction.Up:
+            case Direction.North:
             {
                 Index = Index.SetRow(Index.Row - 1);
                 directionPart = Vector3.forward * moveDistance;
                 break;
             }
-            case Direction.Right:
+            case Direction.East:
             {
                 Index = Index.SetCol(Index.Col + 1);
                 directionPart = Vector3.right * moveDistance;
                 break;
             }
-            case Direction.Left:
+            case Direction.West:
             {
                 Index = Index.SetCol(Index.Col - 1);
                 directionPart = Vector3.left * moveDistance;
@@ -153,6 +162,12 @@ public class Tile : MonoBehaviour
 
         Vector3 transformDrift = new Vector3(horizontalDrift, transform.position.y, verticalDrift);
         mBody.MovePosition(transform.position - transformDrift);
+
+        // Set slideable colour for new edge tiles (
+        if (Index.Row == 0 || Index.Col == 0 || Index.Row == Map.Get.MapSizeVertical - 1 || Index.Col == Map.Get.MapSizeHorizontal - 1)
+        { 
+            mRenderer.material = slideableMaterial;
+        }
     }
 
     // Lifts the end tile that will be pushed off the map and places it at the start of the row / column
@@ -165,25 +180,25 @@ public class Tile : MonoBehaviour
 
         switch (direction)
         {
-            case Direction.Down:
+            case Direction.South:
             {
                 Index = Index.SetRow(0);  // Must do these before any yeild statements
                 directionPart = Vector3.forward * (moveDistance * (Map.Get.MapSizeVertical - 1));
                 break;
             }
-            case Direction.Up:
+            case Direction.North:
             {
                 Index = Index.SetRow(Map.Get.MapSizeVertical - 1);
                 directionPart = Vector3.back * (moveDistance * (Map.Get.MapSizeVertical - 1));
                 break;
             }
-            case Direction.Right:
+            case Direction.East:
             {
                 Index = Index.SetCol(0);
                 directionPart = Vector3.left * (moveDistance * (Map.Get.MapSizeHorizontal - 1));
                 break;
             }
-            case Direction.Left:
+            case Direction.West:
             {
                 Index = Index.SetCol(Map.Get.MapSizeHorizontal - 1);
                 directionPart = Vector3.right * (moveDistance * (Map.Get.MapSizeHorizontal - 1));
@@ -198,7 +213,7 @@ public class Tile : MonoBehaviour
         // Lift and slide tile to start of row / column
         Vector3 liftPart = Vector3.zero;  // Store the Up / Down movement component
 
-        ToggleAllDoors();  // Close the doors for takeoff
+        ToggleAllDoors(true);  // Close the doors for takeoff
 
         float endTime = Time.fixedTime + (slideTime * 0.5f);  // Set up half the time for the first movement
         while (Time.fixedTime < endTime)
@@ -216,7 +231,7 @@ public class Tile : MonoBehaviour
             yield return waitForFixedUpdate;
         }
 
-        ToggleAllDoors();  // Reopen doors after landing
+        ToggleAllDoors(false);  // Reopen doors after landing
 
         // Fix any transform drift
         float horizontalDrift = transform.position.x % moveDistance;
@@ -239,15 +254,15 @@ public class Tile : MonoBehaviour
         doors = new GameObject[4];
         Transform checkDoor;
         checkDoor = transform.FindChild("Door_N");
-        if (checkDoor != null) { doors[(int) Direction.Up] = checkDoor.gameObject; }
+        if (checkDoor != null) { doors[(int) Direction.North] = checkDoor.gameObject; }
         checkDoor = transform.FindChild("Door_E");
-        if (checkDoor != null) { doors[(int) Direction.Right] = checkDoor.gameObject; }
+        if (checkDoor != null) { doors[(int) Direction.East] = checkDoor.gameObject; }
         checkDoor = transform.FindChild("Door_S");
-        if (checkDoor != null) { doors[(int) Direction.Down] = checkDoor.gameObject; }
+        if (checkDoor != null) { doors[(int) Direction.South] = checkDoor.gameObject; }
         checkDoor = transform.FindChild("Door_W");
-        if (checkDoor != null) { doors[(int) Direction.Left] = checkDoor.gameObject; }
+        if (checkDoor != null) { doors[(int) Direction.West] = checkDoor.gameObject; }
 
-        ToggleAllDoors();  // Turn off all doors at the start
+        ToggleAllDoors(false);  // Turn off all doors at the start
     }
 
     // Close / open a door on a specific tile edge direction
@@ -264,17 +279,31 @@ public class Tile : MonoBehaviour
     // Shortcut for toggling all potential doors on a tile
     private void ToggleAllDoors(bool shouldBeClosed)
     {
-        ToggleDoor(Direction.Up,    shouldBeClosed);
-        ToggleDoor(Direction.Right, shouldBeClosed);
-        ToggleDoor(Direction.Down,  shouldBeClosed);
-        ToggleDoor(Direction.Left,  shouldBeClosed);
+        ToggleDoor(Direction.North, shouldBeClosed);
+        ToggleDoor(Direction.East,  shouldBeClosed);
+        ToggleDoor(Direction.South, shouldBeClosed);
+        ToggleDoor(Direction.West,  shouldBeClosed);
     }
 
     private void ToggleAllDoors()
     {
-        ToggleDoor(Direction.Up,    !doors[(int) Direction.Up].activeSelf);
-        ToggleDoor(Direction.Right, !doors[(int) Direction.Right].activeSelf);
-        ToggleDoor(Direction.Down,  !doors[(int) Direction.Down].activeSelf);
-        ToggleDoor(Direction.Left,  !doors[(int) Direction.Left].activeSelf);
+        ToggleDoor(Direction.North, !doors[(int) Direction.North].activeSelf);
+        ToggleDoor(Direction.East,  !doors[(int) Direction.East].activeSelf);
+        ToggleDoor(Direction.South, !doors[(int) Direction.South].activeSelf);
+        ToggleDoor(Direction.West,  !doors[(int) Direction.West].activeSelf);
+    }
+
+    // Public facing interface for the door coroutine
+    public void TriggerSafetyDoor(Direction direction)
+    {
+        StartCoroutine(Co_TriggerSafetyDoor(direction));
+    }
+
+    // Closes the door facing the gap created by a lifted tile (called by Map) then reopens it after the slide has finished
+    private IEnumerator Co_TriggerSafetyDoor(Direction direction)
+    {
+        ToggleDoor(direction, true);
+        yield return waitForSlideTime;
+        ToggleDoor(direction, false);
     }
 }

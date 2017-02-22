@@ -180,7 +180,7 @@ public class Map : MonoBehaviour
         Tile[] tiles;
         Tile.Direction direction;
         
-        // Add in reverse order, references to the tiles to be moved
+        // Add in reverse order, references to the tiles to be moved. Also call for safety doors to raise.
         if (initiatingTileIndex.Row == 0)  // Top edge
         {
             tiles = new Tile[MapSizeVertical];
@@ -188,7 +188,7 @@ public class Map : MonoBehaviour
             {
                 tiles[i] = tileGrid[(MapSizeVertical - 1) - i, initiatingTileIndex.Col];
             }
-            direction = Tile.Direction.Down;
+            direction = Tile.Direction.South;
         }
         else if (initiatingTileIndex.Row == MapSizeVertical - 1)  // Bottom edge
         {
@@ -197,7 +197,7 @@ public class Map : MonoBehaviour
             {
                 tiles[i] = tileGrid[i, initiatingTileIndex.Col];
             }
-            direction = Tile.Direction.Up;
+            direction = Tile.Direction.North;
         }
         else if (initiatingTileIndex.Col == 0) // Left edge
         {
@@ -206,7 +206,7 @@ public class Map : MonoBehaviour
             {
                 tiles[i] = tileGrid[initiatingTileIndex.Row, (MapSizeHorizontal - 1) - i];
             }
-            direction = Tile.Direction.Right;
+            direction = Tile.Direction.East;
         }
         else  // Right edge (Assumes this function will only be called on valid edge tiles)
         {
@@ -215,7 +215,33 @@ public class Map : MonoBehaviour
             {
                 tiles[i] = tileGrid[initiatingTileIndex.Row, i];
             }
-            direction = Tile.Direction.Left;
+            direction = Tile.Direction.West;
+        }
+
+        // Lock facing door on tiles adjacent to the one being lifted and to the gap at the end of the row:
+        // Tile North of lifted and South of gap
+        if (direction == Tile.Direction.South || direction == Tile.Direction.East || direction == Tile.Direction.West)
+        {
+            tileGrid[tiles[0].Index.Row - 1, tiles[0].Index.Col].TriggerSafetyDoor(Tile.Direction.South);
+            if (direction != Tile.Direction.South) { tileGrid[tiles[tiles.Length - 1].Index.Row + 1, tiles[tiles.Length - 1].Index.Col].TriggerSafetyDoor(Tile.Direction.North); }
+        }
+        // Tile South of lifted and North of gap
+        if (direction == Tile.Direction.North || direction == Tile.Direction.East || direction == Tile.Direction.West)
+        {
+            tileGrid[tiles[0].Index.Row + 1, tiles[0].Index.Col].TriggerSafetyDoor(Tile.Direction.North);
+            if (direction != Tile.Direction.North) { tileGrid[tiles[tiles.Length - 1].Index.Row - 1, tiles[tiles.Length - 1].Index.Col].TriggerSafetyDoor(Tile.Direction.South); }
+        }
+        // Tile West of lifted and East of gap
+        if (direction == Tile.Direction.East || direction == Tile.Direction.North || direction == Tile.Direction.South)
+        {
+            tileGrid[tiles[0].Index.Row, tiles[0].Index.Col - 1].TriggerSafetyDoor(Tile.Direction.East);
+            if (direction != Tile.Direction.East) { tileGrid[tiles[tiles.Length - 1].Index.Row, tiles[tiles.Length - 1].Index.Col + 1].TriggerSafetyDoor(Tile.Direction.West); }
+        }
+        // Tile East of lifted and West of gap
+        if (direction == Tile.Direction.West || direction == Tile.Direction.North || direction == Tile.Direction.South)
+        {
+            tileGrid[tiles[0].Index.Row, tiles[0].Index.Col + 1].TriggerSafetyDoor(Tile.Direction.West);
+            if (direction != Tile.Direction.West) { tileGrid[tiles[tiles.Length - 1].Index.Row, tiles[tiles.Length - 1].Index.Col - 1].TriggerSafetyDoor(Tile.Direction.East); }
         }
 
         // Lift up the tile to move over to the end
