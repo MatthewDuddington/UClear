@@ -250,32 +250,15 @@ public class Tile : MonoBehaviour
         ToggleAllDoors();  // Turn off all doors at the start
     }
 
-    // Close / open a door on a tile edge direction
+    // Close / open a door on a specific tile edge direction
     private void ToggleDoor(Direction direction, bool shouldBeClosed)
     {
-        switch (direction)
-        {
-            case Direction.Up:
-            {
-                if (doors[(int) Direction.Up] != null) { doors[(int) Direction.Up].SetActive(shouldBeClosed); }
-                break;
-            }
-            case Direction.Down:
-            {
-                if (doors[(int) Direction.Right] != null) { doors[(int) Direction.Right].SetActive(shouldBeClosed); }
-                break;
-            }
-            case Direction.Left:
-            {
-                if (doors[(int) Direction.Down] != null) { doors[(int) Direction.Down].SetActive(shouldBeClosed); }
-                break;
-            }
-            case Direction.Right:
-            {
-                if (doors[(int) Direction.Left] != null) { doors[(int) Direction.Left].SetActive(shouldBeClosed); }
-                break;
-            }
-        }
+        if (doors[(int) direction] != null) { doors[(int) direction].SetActive(shouldBeClosed); }
+    }
+
+    private void ToggleDoor(Direction direction)
+    {
+        if (doors[(int) direction] != null) { doors[(int) direction].SetActive(!doors[(int) direction].activeSelf); }
     }
 
     // Shortcut for toggling all potential doors on a tile
