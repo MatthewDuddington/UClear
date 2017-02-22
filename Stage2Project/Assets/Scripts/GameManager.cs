@@ -36,7 +36,8 @@ public class GameManager : MonoBehaviour
     {
         Arena.Calculate();
         mPlayer.enabled = false;
-        mState = State.Paused;
+//      mState = State.Paused;
+        mState = State.Playing;
     }
 
     void Update()
@@ -53,7 +54,7 @@ public class GameManager : MonoBehaviour
 
                 int indexToSpawn = Random.Range(0, SpawnPrefabs.Length);
                 GameObject spawnObject = SpawnPrefabs[indexToSpawn];
-                GameObject spawnedInstance = Instantiate(spawnObject);
+                GameObject spawnedInstance = Instantiate(spawnObject, Vector3.one, Quaternion.identity);
                 spawnedInstance.transform.parent = transform;
                 mObjects.Add(spawnedInstance);
                 mNextSpawn = TimeBetweenSpawns;
