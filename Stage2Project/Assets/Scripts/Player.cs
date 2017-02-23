@@ -30,7 +30,10 @@ public class Player : MonoBehaviour
             direction += Input.GetAxisRaw("Vertical") * Vector3.forward;
         }
 
+        Vector3 gravity = Vector3.down * GameManager.Get.gravity * Time.fixedDeltaTime;
+
         // Maintaining use of Rigidbody force rather than Translation
-        mBody.velocity = (direction * Speed);
+        mBody.velocity = (Vector3.up * mBody.velocity.y) + (direction * Speed);
+        mBody.AddForce(gravity);
     }
 }

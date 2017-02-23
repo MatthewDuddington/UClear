@@ -228,7 +228,7 @@ public class Map : MonoBehaviour
             }
         }
 
-        AgentSpawnLocation = spawnTile.transform.position;
+        AgentSpawnLocation = spawnTile.transform.position + (Vector3.up * 0.2f);
         spawnTile.SetAsSpawnLocation();
         cureTile.SetAsCureLocation();
     }

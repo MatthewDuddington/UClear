@@ -9,15 +9,30 @@ public class Agent : MonoBehaviour
     static private float desisionTickTime = 0.3f;
     static private WaitForSeconds waitForDesisionTick = new WaitForSeconds(desisionTickTime);
 
-    static private GameObject agentPrefab = Resources.Load<GameObject>("Boffin_M");  // Remove once randomised function written
+    static private GameObject agentPrefab;  // Remove once randomised function written
 
     public Vector3 FlockForce { get; set; }
     public Vector3 HuntForce  { get; set; }
+    private Vector3 locomoationForce;
+
+    private Rigidbody mBody;
 
     static public GameObject GenerateRandomAgentDesign()
     {
+        if (agentPrefab == null)
+        {
+            agentPrefab = Resources.Load<GameObject>("Boffin_M");
+        }
         GameObject randomAgent = agentPrefab;
         return randomAgent;
+    }
+
+    void Awake()
+    {
+        mBody = gameObject.GetComponent<Rigidbody>();
+
+        ActiveAgentsCount++;
+        Reset();
     }
 
     public void Reset()
@@ -27,6 +42,7 @@ public class Agent : MonoBehaviour
         transform.position = Vector3.down * 100;
         FlockForce = Vector3.zero;
         HuntForce = Vector3.zero;
+        locomoationForce = Vector3.zero;
     }
 
     public void Init()
@@ -43,12 +59,13 @@ public class Agent : MonoBehaviour
         while (enabled)
         {
             // Use context map to decide on weighting of heading
+            locomoationForce = FlockForce + HuntForce;
             yield return waitForDesisionTick;
         }
     }
 
     void FixedUpdate()
     {
-        
+        mBody.AddForce(locomoationForce);
     }
 }

@@ -244,12 +244,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ea46d5eaee5daa47811540d6bd06bef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gravity: 9.8
   SpawnPrefabs:
   - {fileID: 1188342545146432, guid: 1e62935e51a5f46e78f83f4e722db413, type: 2}
   PlayerPrefab: {fileID: 114645105814637946, guid: 7ad876dc80acfcd48a1fd4b15250b137,
     type: 2}
   Arena: {fileID: 1877346107}
   TimeBetweenSpawns: 1
+  numberOfAgentsToSpawn: 30
 --- !u!4 &1236782920
 Transform:
   m_ObjectHideFlags: 0
@@ -592,14 +594,14 @@ MeshCollider:
   m_Convex: 0
   m_InflateMesh: 0
   m_SkinWidth: 0.01
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!33 &1877346105
 MeshFilter:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1877346102}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1877346106
 Transform:
   m_ObjectHideFlags: 0
@@ -607,8 +609,8 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1877346102}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.1, z: 0}
-  m_LocalScale: {x: 20.528011, y: 1, z: 11.547006}
+  m_LocalPosition: {x: 0, y: -5.1, z: 0}
+  m_LocalScale: {x: 205.07481, y: 10, z: 115.354576}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
@@ -624,4 +626,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c51fe289e9f96254ba0e886c6e29e1b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Cam: {fileID: 1260837812}
+  Cam: {fileID: 1423264311}

@@ -4,7 +4,24 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    // Easy accessor for the class instance
+    private static GameManager gameManager_;
+    public static GameManager Get
+    { 
+        get
+        {
+            if (gameManager_ == null)
+            {
+                Debug.LogError("No GameManager present in scene");
+            }
+            return gameManager_;
+        }
+        private set { gameManager_ = value; }
+    } 
+
     public enum State { Paused, Playing }
+
+    public float gravity = 9.8f;
 
     [SerializeField]
     private GameObject [] SpawnPrefabs;
@@ -19,50 +36,60 @@ public class GameManager : MonoBehaviour
     private float TimeBetweenSpawns;
 
     [SerializeField]
-    private int numberOfAgents = 30;
+    private int numberOfAgentsToSpawn = 30;
 
     private Agent [] mAgents;  // Changed mObjects List to mAgents Array to reflect its use in this game and known size
     private Player mPlayer;
     private State mState;
-//    private float mNextSpawn;
+    private float mNextSpawn;
+
+    private WaitForSeconds waitForTimeBetweenSpawns;
 
     void Awake()
     {
+        gameManager_ = this;
+
         mPlayer = Instantiate(PlayerPrefab);
         mPlayer.transform.parent = transform;
 
         ScreenManager.OnNewGame += ScreenManager_OnNewGame;
         ScreenManager.OnExitGame += ScreenManager_OnExitGame;
 
-        mAgents = new Agent[numberOfAgents];
+        mAgents = new Agent[numberOfAgentsToSpawn];
+
+        waitForTimeBetweenSpawns = new WaitForSeconds(TimeBetweenSpawns);
     }
 
     void Start()
     {
         Arena.Calculate();
-        PopulateAgents();
+        PreLoadAgents();
 //        mPlayer.enabled = false;
 //        mState = State.Paused;
         mPlayer.enabled = true;
         mState = State.Playing;
+        StartCoroutine(Co_SpawnAgents());
     }
 
     // Changed ticking random spawn in Update function to instead pre-load a list of random agents
-    private void PopulateAgents()
+    private void PreLoadAgents()
     {
-        for (int i = 0; i < numberOfAgents; i++)
+        for (int i = 0; i < numberOfAgentsToSpawn; i++)
         {
             GameObject spawnAgent = Agent.GenerateRandomAgentDesign();
-            GameObject spawnedInstance = Instantiate(spawnAgent, Map.Get.AgentSpawnLocation, Quaternion.identity);
+            GameObject spawnedInstance = Instantiate(spawnAgent, Vector3.down * 100, Quaternion.identity);
             Agent spawnedAgent = spawnedInstance.gameObject.GetComponent<Agent>();
             mAgents[i] = spawnedAgent;
-            mAgents[i].Reset();
         }
     }
 
-    private void SpawnAgent()
+    private IEnumerator Co_SpawnAgents()
     {
-        mAgents[Agent.ActiveAgentsCount].Init();
+        while (mState == State.Playing && Agent.ActiveAgentsCount < numberOfAgentsToSpawn)
+        {
+            mAgents[Agent.ActiveAgentsCount].Init();
+            yield return waitForTimeBetweenSpawns;
+        }
     }
 
     private void BeginNewGame()
@@ -73,7 +100,7 @@ public class GameManager : MonoBehaviour
         }
 
         mPlayer.transform.position = new Vector3(0.0f, 0.5f, 0.0f);
-//        mNextSpawn = TimeBetweenSpawns;
+        mNextSpawn = TimeBetweenSpawns;
         mPlayer.enabled = true;
         mState = State.Playing;
     }

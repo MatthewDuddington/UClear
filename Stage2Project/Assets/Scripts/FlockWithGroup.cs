@@ -22,18 +22,20 @@ public class FlockWithGroup : MonoBehaviour
 
     private List<GroupTag> mCurrentBuddies;
     private Rigidbody mBody;
+    private Agent mAgent;
     private float mCountDownToCheck;
 
     void Awake()
     {
         mCurrentBuddies = new List<GroupTag>();
         mBody = GetComponent<Rigidbody>();
+        mAgent = GetComponent<Agent>();
         mCountDownToCheck = 0.0f;
     }
 
-    void Update()
+    void FixedUpdate()
     {
-        mCountDownToCheck -= Time.deltaTime;
+        mCountDownToCheck -= Time.fixedDeltaTime;
         if (mCountDownToCheck <= 0.0f)
         {
             UpdateBuddyList();
@@ -96,7 +98,7 @@ public class FlockWithGroup : MonoBehaviour
             avoid = transform.position - avoid;
             avoid.Normalize();
 
-            mBody.AddForce(( align + cohesion + avoid) * Speed * Time.deltaTime);
+            mAgent.FlockForce = ( align + cohesion + avoid) * Speed * Time.fixedDeltaTime;
         }
     }
 }
