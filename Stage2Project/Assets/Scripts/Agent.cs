@@ -6,14 +6,21 @@ public class Agent : MonoBehaviour
 { 
     static public int ActiveAgentsCount { get; private set; }
 
+    static public float ColliderRadius { get; private set; }
+
     static private float desisionTickTime = 0.3f;
     static private WaitForSeconds waitForDesisionTick = new WaitForSeconds(desisionTickTime);
 
     static private GameObject agentPrefab;  // Remove once randomised function written
 
-    public Vector3 FlockForce { get; set; }
-    public Vector3 HuntForce  { get; set; }
-    private Vector3 locomoationForce;
+    private Vector3 gravity;
+
+    public Vector3 FlockVector;  //{ get; set; }
+    public Vector3 HuntVector;   //{ get; set; }
+    public Vector3 locomoationForce;  // TODO set back to private
+
+    [SerializeField]
+    private float Speed = 500;
 
     private Rigidbody mBody;
 
@@ -30,24 +37,30 @@ public class Agent : MonoBehaviour
     void Awake()
     {
         mBody = gameObject.GetComponent<Rigidbody>();
+        ColliderRadius = GetComponent<CapsuleCollider>().radius;
 
         ActiveAgentsCount++;
         Reset();
     }
 
+    void Start()
+    {
+        gravity = Vector3.down * GameManager.Get.gravity * mBody.mass;
+    }
+
     public void Reset()
     {
-        enabled = false;
+        gameObject.SetActive(false);
         ActiveAgentsCount--;
         transform.position = Vector3.down * 100;
-        FlockForce = Vector3.zero;
-        HuntForce = Vector3.zero;
+        FlockVector = Vector3.zero;
+        HuntVector = Vector3.zero;
         locomoationForce = Vector3.zero;
     }
 
     public void Init()
     {
-        enabled = true;
+        gameObject.SetActive(true);
         ActiveAgentsCount++;
         transform.position = Map.Get.AgentSpawnLocation;
         transform.rotation = Quaternion.identity;
@@ -56,16 +69,24 @@ public class Agent : MonoBehaviour
 
     private IEnumerator Co_DesisionTick()
     {
-        while (enabled)
+        while (gameObject.activeSelf)
         {
             // Use context map to decide on weighting of heading
-            locomoationForce = FlockForce + HuntForce;
+            locomoationForce = Vector3.zero;
+            locomoationForce += FlockVector + HuntVector;
+            locomoationForce *= mBody.mass;
+            locomoationForce *= Speed * Time.fixedDeltaTime;
             yield return waitForDesisionTick;
         }
     }
 
     void FixedUpdate()
     {
-        mBody.AddForce(locomoationForce);
+        mBody.AddForce(locomoationForce + gravity);
+//        mBody.velocity = new Vector3(mBody.velocity.x, Mathf.Clamp(mBody.velocity.y, -9.8f, 9.8f), mBody.velocity.z);
+
+        velocityV = mBody.velocity;
     }
+
+    public Vector3 velocityV;  // TODO Temporary variable to display velocity
 }

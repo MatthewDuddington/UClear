@@ -245,6 +245,48 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gravity: 9.8
+  liftCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0.001574803
+      inSlope: 5.1448812
+      outSlope: 5.1448812
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 0.1
+      value: 0.5
+      inSlope: 3.328084
+      outSlope: 3.328084
+      tangentMode: 34
+    - serializedVersion: 2
+      time: 0.4
+      value: 1.0015748
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 0.6
+      value: 1.0015748
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 0.9
+      value: 0.5004157
+      inSlope: -3.3294692
+      outSlope: -3.3294692
+      tangentMode: 34
+    - serializedVersion: 2
+      time: 1
+      value: 0.001574803
+      inSlope: -5.373546
+      outSlope: -5.373546
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
   SpawnPrefabs:
   - {fileID: 1188342545146432, guid: 1e62935e51a5f46e78f83f4e722db413, type: 2}
   PlayerPrefab: {fileID: 114645105814637946, guid: 7ad876dc80acfcd48a1fd4b15250b137,
@@ -511,7 +553,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4107038783598846, guid: 8b2cc18d35b6d49cfbcf42c9a39ae037, type: 2}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 114987587135529442, guid: 8b2cc18d35b6d49cfbcf42c9a39ae037,
         type: 2}
@@ -521,12 +563,12 @@ Prefab:
     - target: {fileID: 114987587135529442, guid: 8b2cc18d35b6d49cfbcf42c9a39ae037,
         type: 2}
       propertyPath: mapSizeHorizontal
-      value: 5
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 114987587135529442, guid: 8b2cc18d35b6d49cfbcf42c9a39ae037,
         type: 2}
       propertyPath: mapSizeVertical
-      value: 5
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8b2cc18d35b6d49cfbcf42c9a39ae037, type: 2}
@@ -581,8 +623,8 @@ MeshRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 0
---- !u!64 &1877346104
-MeshCollider:
+--- !u!65 &1877346104
+BoxCollider:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
@@ -591,10 +633,8 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Convex: 0
-  m_InflateMesh: 0
-  m_SkinWidth: 0.01
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!33 &1877346105
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -613,7 +653,7 @@ Transform:
   m_LocalScale: {x: 205.07481, y: 10, z: 115.354576}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1877346107
 MonoBehaviour:

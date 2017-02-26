@@ -8,7 +8,7 @@ public class Tile : MonoBehaviour
 
     public static int Size { get { return 7; } }
     public static float moveDistance { get { return Size * 2; } }
-    public static float LiftDistance { get { return Size * 10; } }
+    public static float LiftDistance { get { return Size * 5; } }
 
     public static Tile ActiveTile;
 
@@ -135,6 +135,10 @@ public class Tile : MonoBehaviour
         mRenderer.material = cureLocationMaterial;
         IsCureTile = true;
     }
+
+    //----------------------------------------------------------------------------//
+    //                             TILE MOVEMENT                                  //
+    //----------------------------------------------------------------------------//
 
     // Public facing interface for the slide coroutines
     public void Slide(Direction direction, bool shouldLift = false)
@@ -292,6 +296,19 @@ public class Tile : MonoBehaviour
 
         ToggleAllDoors(true);  // Close the doors for takeoff
 
+        // Curved tile movment
+        //*/
+        float startTime = Time.fixedTime;
+        float endTime = startTime + slideTime;
+        while (Time.fixedTime < endTime)
+        {
+            float t = (Time.fixedTime - startTime) / slideTime;
+            liftPart = Vector3.up * ((LiftDistance * GameManager.Get.liftCurve.Evaluate(t)) - transform.position.y);
+            mBody.MovePosition((transform.position + ((directionPart / slideTime) * Time.fixedDeltaTime)) + liftPart);
+            yield return waitForFixedUpdate;
+        }
+        /*/
+        // Trianglular tile movement
         float endTime = Time.fixedTime + (slideTime * 0.5f);  // Set up half the time for the first movement
         while (Time.fixedTime < endTime)
         {
@@ -307,6 +324,7 @@ public class Tile : MonoBehaviour
             mBody.MovePosition(transform.position + (((directionPart + liftPart) / slideTime) * Time.fixedDeltaTime));
             yield return waitForFixedUpdate;
         }
+        //*/
 
         ToggleAllDoors(false);  // Reopen doors after landing
 
@@ -336,6 +354,10 @@ public class Tile : MonoBehaviour
 
         areSliding = false;  // Re-enable other movements
     }
+
+    //----------------------------------------------------------------------------//
+    //                                  DOORS                                     //
+    //----------------------------------------------------------------------------//
 
     // Check to see which edges have doors and store references 
     private void LoadDoors()

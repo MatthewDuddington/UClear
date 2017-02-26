@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
 
     public float gravity = 9.8f;
 
+    public AnimationCurve liftCurve;  // Curve to drive height of tiles when lifted off the map
+
     [SerializeField]
     private GameObject [] SpawnPrefabs;
 
@@ -66,7 +68,7 @@ public class GameManager : MonoBehaviour
         PreLoadAgents();
 //        mPlayer.enabled = false;
 //        mState = State.Paused;
-        mPlayer.enabled = true;
+        mPlayer.gameObject.SetActive(true);
         mState = State.Playing;
         StartCoroutine(Co_SpawnAgents());
     }
@@ -87,7 +89,21 @@ public class GameManager : MonoBehaviour
     {
         while (mState == State.Playing && Agent.ActiveAgentsCount < numberOfAgentsToSpawn)
         {
-            mAgents[Agent.ActiveAgentsCount].Init();
+            // Check whether spawning an agent would cause it to overlap with an existing agent
+            bool shouldSpawn = true;
+            Collider[] spawnCollisions = Physics.OverlapSphere(Map.Get.AgentSpawnLocation, Agent.ColliderRadius);
+            foreach (Collider other in spawnCollisions)
+            {
+                if (other.CompareTag("Boffin"))
+                {
+                    shouldSpawn = false;
+                }
+            }
+            // If spawn location is clear, then spawn the agent
+            if (shouldSpawn)
+            {
+                mAgents[Agent.ActiveAgentsCount].Init();
+            }
             yield return waitForTimeBetweenSpawns;
         }
     }
@@ -101,13 +117,13 @@ public class GameManager : MonoBehaviour
 
         mPlayer.transform.position = new Vector3(0.0f, 0.5f, 0.0f);
         mNextSpawn = TimeBetweenSpawns;
-        mPlayer.enabled = true;
+        mPlayer.gameObject.SetActive(true);
         mState = State.Playing;
     }
 
     private void EndGame()
     {
-        mPlayer.enabled = false;
+        mPlayer.gameObject.SetActive(false);
         mState = State.Paused;
     }
 

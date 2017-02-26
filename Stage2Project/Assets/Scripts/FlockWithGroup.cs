@@ -8,8 +8,8 @@ public class FlockWithGroup : MonoBehaviour
     [SerializeField]
     private GroupTag.Group GroupCode;
 
-    [SerializeField]
-    private float Speed;
+//    [SerializeField]
+//    private float Speed;  // Moved to Agent class
 
     [SerializeField]
     private float BuddyDistance = 100.0f;
@@ -21,14 +21,14 @@ public class FlockWithGroup : MonoBehaviour
     private float CheckForBuddiesInterval = 10.0f;
 
     private List<GroupTag> mCurrentBuddies;
-    private Rigidbody mBody;
+//    private Rigidbody mBody;
     private Agent mAgent;
     private float mCountDownToCheck;
 
     void Awake()
     {
         mCurrentBuddies = new List<GroupTag>();
-        mBody = GetComponent<Rigidbody>();
+//        mBody = GetComponent<Rigidbody>();
         mAgent = GetComponent<Agent>();
         mCountDownToCheck = 0.0f;
     }
@@ -98,7 +98,7 @@ public class FlockWithGroup : MonoBehaviour
             avoid = transform.position - avoid;
             avoid.Normalize();
 
-            mAgent.FlockForce = ( align + cohesion + avoid) * Speed * Time.fixedDeltaTime;
+            mAgent.FlockVector = (align + cohesion + avoid).normalized;  // Changed to submit resulting flocking force to the main agent script to resolve with weighting
         }
     }
 }
