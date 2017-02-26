@@ -17,6 +17,7 @@ public class Agent : MonoBehaviour
 
     public Vector3 FlockVector;  //{ get; set; }
     public Vector3 HuntVector;   //{ get; set; }
+    public Vector3 WanderVector; //{ get; set; }
     public Vector3 locomoationForce;  // TODO set back to private
 
     [SerializeField]
@@ -73,7 +74,8 @@ public class Agent : MonoBehaviour
         {
             // Use context map to decide on weighting of heading
             locomoationForce = Vector3.zero;
-            locomoationForce += FlockVector + HuntVector;
+           // locomoationForce += FlockVector + HuntVector;
+            locomoationForce += WanderVector;
             locomoationForce *= mBody.mass;
             locomoationForce *= Speed * Time.fixedDeltaTime;
             yield return waitForDesisionTick;
