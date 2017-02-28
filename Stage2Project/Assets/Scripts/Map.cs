@@ -156,15 +156,29 @@ public class Map : MonoBehaviour
                 if (tileGrid[row, col] == null)
                 {
                     int randomTile = Random.Range(0, TilePrefabs.Length);
-                    bool isEdgeTile = false;
-                    if (  row == 0 
-                       || col == 0 
-                       || row == MapSizeVertical - 1 
-                       || col == MapSizeHorizontal - 1)
+                    if (row == 0)  // N
                     {
-                        isEdgeTile = true;
+                        tileGrid[row, col] = Instantiate (TilePrefabs[randomTile]).Init(row, col, true, true);
+                        tileGrid[row, col].mFloor.transform.Rotate(Vector3.up, 180);
                     }
-                    tileGrid[row, col] = Instantiate (TilePrefabs[randomTile]).Init(row, col, true, isEdgeTile);
+                    else if (col == 0)  // W
+                    {
+                        tileGrid[row, col] = Instantiate (TilePrefabs[randomTile]).Init(row, col, true, true);
+                        tileGrid[row, col].mFloor.transform.Rotate(Vector3.up, 90);
+                    }
+                    else if (row == MapSizeVertical - 1)  // S
+                    {
+                        tileGrid[row, col] = Instantiate (TilePrefabs[randomTile]).Init(row, col, true, true);
+                    }
+                    else if (col == MapSizeHorizontal - 1)  // E
+                    {
+                        tileGrid[row, col] = Instantiate (TilePrefabs[randomTile]).Init(row, col, true, true);
+                        tileGrid[row, col].mFloor.transform.Rotate(Vector3.up, 270);
+                    }
+                    else
+                    {
+                        tileGrid[row, col] = Instantiate (TilePrefabs[randomTile]).Init(row, col, true, false);
+                    }
                 }
             }
         }
@@ -181,7 +195,7 @@ public class Map : MonoBehaviour
             // Shift the tile by half the map's height and width plus adjust for the tile axis being at it's centre
             float horizontalPos = (Tile.Size * -MapSizeHorizontal * 0.5f) + (Tile.Size * 0.5f);
             float verticalPos = (Tile.Size * MapSizeVertical * 0.5f) - (Tile.Size * 0.5f);
-            tile.transform.Translate(new Vector3(horizontalPos, verticalPos, 0));
+            tile.transform.Translate(new Vector3(horizontalPos, 0, verticalPos));
         }
 
         // Scale the map TODO Avoid hardcoded value here
@@ -298,19 +312,19 @@ public class Map : MonoBehaviour
         // Tile West of lifted and East of gap
         if (direction == Tile.Direction.East || direction == Tile.Direction.North || direction == Tile.Direction.South)
         {
-            tileGrid[tiles[0].Index.Row, tiles[0].Index.Col - 1].TriggerSafetyDoor(Tile.Direction.East);
+            tileGrid[tiles[0].Index.Row, tiles[0].Index.Col - 1].TriggerSafetyDoor(Tile.Direction.West);
             if (direction != Tile.Direction.East)
             {
-                tileGrid[tiles[tiles.Length - 1].Index.Row, tiles[tiles.Length - 1].Index.Col + 1].TriggerSafetyDoor(Tile.Direction.West);
+                tileGrid[tiles[tiles.Length - 1].Index.Row, tiles[tiles.Length - 1].Index.Col + 1].TriggerSafetyDoor(Tile.Direction.East);
             }
         }
         // Tile East of lifted and West of gap
         if (direction == Tile.Direction.West || direction == Tile.Direction.North || direction == Tile.Direction.South)
         {
-            tileGrid[tiles[0].Index.Row, tiles[0].Index.Col + 1].TriggerSafetyDoor(Tile.Direction.West);
+            tileGrid[tiles[0].Index.Row, tiles[0].Index.Col + 1].TriggerSafetyDoor(Tile.Direction.East);
             if (direction != Tile.Direction.West)
             {
-                tileGrid[tiles[tiles.Length - 1].Index.Row, tiles[tiles.Length - 1].Index.Col - 1].TriggerSafetyDoor(Tile.Direction.East);
+                tileGrid[tiles[tiles.Length - 1].Index.Row, tiles[tiles.Length - 1].Index.Col - 1].TriggerSafetyDoor(Tile.Direction.West);
             }
         }
 

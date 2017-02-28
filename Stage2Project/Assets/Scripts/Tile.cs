@@ -19,6 +19,8 @@ public class Tile : MonoBehaviour
     public bool IsMovable  { get; private set; }
     public bool IsEdgeTile { get; private set; }
 
+    public GameObject mFloor { get; private set; }
+
     private bool IsSpawnTile = false;
     private bool IsCureTile = false;
 
@@ -28,6 +30,7 @@ public class Tile : MonoBehaviour
     private static Material hoverMaterial;
     private static Material spawnLocationMaterial;
     private static Material cureLocationMaterial;
+    private static Material cureLocationWallMaterial;
 
     private Rigidbody mBody;
 
@@ -44,8 +47,10 @@ public class Tile : MonoBehaviour
         hoverMaterial = Resources.Load<Material>("TileHoverMaterial");
         spawnLocationMaterial = Resources.Load<Material>("TileSpawnLocationMaterial");
         cureLocationMaterial = Resources.Load<Material>("TileCureLocationMaterial");
+        cureLocationWallMaterial = Resources.Load<Material>("WallDecontamination");
 
-        mBody = gameObject.GetComponent<Rigidbody>();
+        mBody = GetComponent<Rigidbody>();
+        mFloor = transform.GetChild(0).gameObject;
 
         waitForFixedUpdate = new WaitForFixedUpdate();
 
@@ -133,6 +138,10 @@ public class Tile : MonoBehaviour
     public void SetAsCureLocation()
     {
         mRenderer.material = cureLocationMaterial;
+        for (int i = 1; i <= 3; i++)
+        {
+            transform.GetChild(i).GetComponent<Renderer>().material = cureLocationWallMaterial;
+        }
         IsCureTile = true;
     }
 
@@ -233,11 +242,23 @@ public class Tile : MonoBehaviour
         mBody.MovePosition(transform.position - transformDrift);
 
         // Set slideable colour for new edge tiles (
-        if (  Index.Row == 0 
-           || Index.Col == 0 
-           || Index.Row == Map.Get.MapSizeVertical - 1 
-           || Index.Col == Map.Get.MapSizeHorizontal - 1)
+        if (Index.Row == 0)
+        {
+            mFloor.transform.rotation = Quaternion.Euler(Vector3.up * 180);
+            mRenderer.material = slideableMaterial;
+        }
+        else if (Index.Col == 0)
+        {
+            mFloor.transform.rotation = Quaternion.Euler(Vector3.up * 90);
+            mRenderer.material = slideableMaterial;
+        } 
+        else if (Index.Row == Map.Get.MapSizeVertical - 1)
+        {
+            mRenderer.material = slideableMaterial;
+        }
+        else if (Index.Col == Map.Get.MapSizeHorizontal - 1)
         { 
+            mFloor.transform.rotation = Quaternion.Euler(Vector3.up * 270);
             mRenderer.material = slideableMaterial;
         }
     }
@@ -285,6 +306,8 @@ public class Tile : MonoBehaviour
            || Index.Col == Map.Get.MapSizeHorizontal - 1)
         {
             IsEdgeTile = true;
+            // Rotate texture to face correct direction
+            mFloor.transform.Rotate(Vector3.up, 180);
         }
         else
         {
@@ -330,6 +353,7 @@ public class Tile : MonoBehaviour
 
         // Fix any transform drift
         float horizontalDrift = transform.position.x % moveDistance;
+        print(horizontalDrift);
         if (horizontalDrift >= Size)
         {
             horizontalDrift = moveDistance - horizontalDrift;
@@ -340,6 +364,7 @@ public class Tile : MonoBehaviour
         }
 
         float verticalDrift = transform.position.z % moveDistance;
+        print(verticalDrift);
         if (verticalDrift >= Size)
         {
             verticalDrift = moveDistance - verticalDrift;
