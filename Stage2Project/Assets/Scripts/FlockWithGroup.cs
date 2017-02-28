@@ -6,6 +6,9 @@ using UnityEngine;
 public class FlockWithGroup : MonoBehaviour
 {
     [SerializeField]
+    private float FlockStrength = 1;
+
+    [SerializeField]
     private GroupTag.Group GroupCode;
 
 //    [SerializeField]
@@ -98,7 +101,7 @@ public class FlockWithGroup : MonoBehaviour
             avoid = transform.position - avoid;
             avoid.Normalize();
 
-            mAgent.FlockVector = (align + cohesion + avoid).normalized;  // Changed to submit resulting flocking force to the main agent script to resolve with weighting
+            mAgent.FlockForce = ((align + cohesion + avoid).normalized) * FlockStrength;  // Changed to submit resulting flocking force to the main agent script to resolve with weighting
         }
     }
 }
