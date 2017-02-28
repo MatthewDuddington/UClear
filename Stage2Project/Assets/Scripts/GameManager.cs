@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public delegate void GameEvent();
+    public static event GameEvent OnRadiationDamage;
+
     // Easy accessor for the class instance
     private static GameManager gameManager_;
     public static GameManager Get
@@ -36,16 +39,24 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private float TimeBetweenSpawns;
+    private WaitForSeconds waitForTimeBetweenSpawns;
+
+    [SerializeField]
+    private float RadiationTickTime;
+    private WaitForSeconds waitForRadiationTick;
 
     [SerializeField]
     private int numberOfAgentsToSpawn = 30;
+
+    public int numberOfResearchersToWin = 10;
+
+    private int radiationLevel = 0;
 
     private Agent [] mAgents;  // Changed mObjects List to mAgents Array to reflect its use in this game and known size
     private Player mPlayer;
     private State mState;
     private float mNextSpawn;
 
-    private WaitForSeconds waitForTimeBetweenSpawns;
 
     void Awake()
     {
@@ -60,11 +71,12 @@ public class GameManager : MonoBehaviour
         mAgents = new Agent[numberOfAgentsToSpawn];
 
         waitForTimeBetweenSpawns = new WaitForSeconds(TimeBetweenSpawns);
+        waitForRadiationTick = new WaitForSeconds(RadiationTickTime);
     }
 
     void Start()
     {
-        Arena.Calculate();
+//        Arena.Calculate();
         PreLoadAgents();
 //        mPlayer.enabled = false;
 //        mState = State.Paused;
@@ -135,5 +147,19 @@ public class GameManager : MonoBehaviour
     private void ScreenManager_OnExitGame()
     {
         EndGame();
+    }
+
+    public void AddRadiation(int radiationAmount)
+    {
+
+    }
+
+    private IEnumerator RadiationTick()
+    {
+        while (State.Playing)
+        {
+            yield return waitForRadiationTick;
+            AddRadiation(1);
+        }
     }
 }

@@ -1,17 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ScreenManager : MonoBehaviour
 {
     public delegate void GameEvent();
     public static event GameEvent OnNewGame;
     public static event GameEvent OnExitGame;
+    public static event GameEvent OnRadiationDamage;
 
     public enum Screens { TitleScreen, GameScreen, ResultScreen, NumScreens }
 
     private Canvas [] mScreens;
     private Screens mCurrentScreen;
+
+    private Image RadiationMeter;
+    private Image ResearchMeter;
+    private Image RadiationIcon;
+    private Image ResearchIcon;
+    private Image RadiationBar;
+    private Image ResearchBar;
 
     void Awake()
     {
@@ -33,6 +42,9 @@ public class ScreenManager : MonoBehaviour
         {
             mScreens[screen].enabled = false;
         }
+
+        RadiationMeter = GameObject.Find("RadiationMeter").GetComponent<Image>();
+        ResearchMeter = GameObject.Find("ResearchMeter").GetComponent<Image>();
 
         mCurrentScreen = Screens.TitleScreen;
     }
@@ -62,5 +74,15 @@ public class ScreenManager : MonoBehaviour
         mScreens[(int)mCurrentScreen].enabled = false;
         mScreens[(int)screen].enabled = true;
         mCurrentScreen = screen;
+    }
+
+    public void FillRadiationMeter(float amount)
+    {
+        RadiationMeter.fillAmount += amount;
+    }
+
+    public void FillResearchMeter()
+    {
+        ResearchMeter.fillAmount += 1 / GameManager.Get.numberOfResearchersToWin;
     }
 }

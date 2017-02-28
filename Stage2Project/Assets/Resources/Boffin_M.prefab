@@ -24,6 +24,8 @@ GameObject:
   - component: {fileID: 114915261495733444}
   - component: {fileID: 114824217848520630}
   - component: {fileID: 114142825583879896}
+  - component: {fileID: 114916962071595942}
+  - component: {fileID: 114976714310318088}
   - component: {fileID: 114174255192704150}
   m_Layer: 0
   m_Name: Boffin_M
@@ -812,8 +814,8 @@ Rigidbody:
   m_GameObject: {fileID: 1188342545146432}
   serializedVersion: 2
   m_Mass: 100
-  m_Drag: 0.1
-  m_AngularDrag: 0.1
+  m_Drag: 1
+  m_AngularDrag: 1
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 1
@@ -830,11 +832,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15ea9a52596374dd7afce5e66562d703, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  futureDistance: 3
-  futureRadius: 1.5
-  minRadianOffset: 0.01
+  WanderStrength: 14
+  WanderUpdateTime: 0.1
+  futureDistance: 4
+  futureRadius: 3
+  minRadianOffset: -0.5
   maxRadianOffset: 0.5
-  wanderUpdateTime: 0.1
 --- !u!114 &114174255192704150
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -846,8 +849,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 841787886e79f4bd7b0735ab910c05eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  locomoationForce: {x: 0, y: 0, z: 0}
-  Speed: 500
+  FlockForce: {x: 0, y: 0, z: 0}
+  WanderForce: {x: 0, y: 0, z: 0}
+  AvoidWallsForce: {x: 0, y: 0, z: 0}
+  HuntForce: {x: 0, y: 0, z: 0}
+  MaxSpeed: 100
+  TurningSpeed: 50
   velocityV: {x: 0, y: 0, z: 0}
 --- !u!114 &114824217848520630
 MonoBehaviour:
@@ -855,13 +862,14 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1188342545146432}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e60fd5966a0fec348bda510bfc03b59f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  FlockStrength: 10
   GroupCode: 0
-  BuddyDistance: 50
+  BuddyDistance: 10
   AvoidDistance: 10
   CheckForBuddiesInterval: 2
 --- !u!114 &114915261495733444
@@ -878,6 +886,33 @@ MonoBehaviour:
   RepelForce: 100
   MinimumDistance: 50
   MagnetizeType: 0
+--- !u!114 &114916962071595942
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1188342545146432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b88559fd5a48a4a9fa084017e0b5189c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AvoidanceStrength: 3
+  AvoidanceRadius: 1.5
+  avoidWallsTime: 2.5
+--- !u!114 &114976714310318088
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1188342545146432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afea2f0ddeaba45abac8cc2552b28b4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HuntStrength: 20
+  PlayerSightingDecayTime: 4
 --- !u!136 &136957801528051808
 CapsuleCollider:
   m_ObjectHideFlags: 1

@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Boffin
+  - Wall
   layers:
   - Default
   - TransparentFX
