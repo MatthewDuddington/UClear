@@ -21,15 +21,17 @@ public class Tile : MonoBehaviour
 
     public GameObject mFloor { get; private set; }
 
+    public Direction [] Exits { get; private set; }
+
     private bool IsSpawnTile = false;
-    private bool IsCureTile = false;
+    private bool IsDecontamTile = false;
 
     private MeshRenderer mRenderer;
     private static Material mainMaterial;
     private static Material slideableMaterial;
     private static Material hoverMaterial;
-    private static Material cureLocationMaterial;
-    private static Material cureLocationWallMaterial;
+    private static Material decontamLocationMaterial;
+    private static Material decontamLocationWallMaterial;
 
     private Rigidbody mBody;
 
@@ -50,7 +52,8 @@ public class Tile : MonoBehaviour
 
         waitForFixedUpdate = new WaitForFixedUpdate();
 
-        LoadDoors();
+        Exits = new Direction[4];
+        LoadDoorsAndExits();
     }
 
     public Tile Init (int row, int col, bool isMovable, bool isEdgeTile)
@@ -66,7 +69,8 @@ public class Tile : MonoBehaviour
             GameObject.Destroy(gameObject.GetComponent<Rigidbody>());
         }
 
-        if (IsMovable && IsEdgeTile)
+        if ( IsMovable
+          && IsEdgeTile)
         {
             mRenderer.material = slideableMaterial;
         }
@@ -79,7 +83,8 @@ public class Tile : MonoBehaviour
     {
         if(GameManager.Get.mState == GameManager.State.Playing)
         {
-            if (IsEdgeTile && IsMovable)
+            if ( IsEdgeTile
+              && IsMovable)
             { 
                 mRenderer.material = hoverMaterial;
             }
@@ -90,14 +95,16 @@ public class Tile : MonoBehaviour
     {
         if(GameManager.Get.mState == GameManager.State.Playing)
         {
-            if (IsEdgeTile && IsMovable)
+            if ( IsEdgeTile
+              && IsMovable)
             {
                 if (mRenderer.material != mainMaterial && ActiveTile != this)
                 { 
                     mRenderer.material = slideableMaterial;
                 }
             }
-            else if (!IsSpawnTile && !IsCureTile)
+            else if ( !IsSpawnTile
+                   && !IsDecontamTile)
             { 
                 mRenderer.material = mainMaterial;
             }
@@ -129,7 +136,16 @@ public class Tile : MonoBehaviour
         }
     }
 
-    // Set visual for Spawn tile
+    void OnTriggerEnter(Collider other)
+    {
+        if ( IsDecontamTile
+          && other.gameObject.CompareTag("Agent"))
+        {
+            other.gameObject.GetComponent<Agent>().Decontaminate();
+        }
+    }
+
+    // Set visual and reference for Spawn tile
     public void SetAsSpawnLocation()
     {
         mRenderer.material = Resources.Load<Material>("TileSpawnLocationMaterial");
@@ -141,18 +157,18 @@ public class Tile : MonoBehaviour
         IsSpawnTile = true;
     }
 
-    // Set visual for Decontamination tile
-    public void SetAsCureLocation()
+    // Set visual and reference for Decontamination tile
+    public void SetAsDecontaminationLocation()
     {
         mRenderer.material = Resources.Load<Material>("TileCureLocationMaterial");
-        Material cureLocationWallMaterial = Resources.Load<Material>("WallDecontaminationMaterial");
+        Material decontamLocationWallMaterial = Resources.Load<Material>("WallDecontaminationMaterial");
         for (int i = 1; i <= 3; i++)
         {
-            transform.GetChild(i).GetComponent<Renderer>().material = cureLocationWallMaterial;
+            transform.GetChild(i).GetComponent<Renderer>().material = decontamLocationWallMaterial;
         }
-        IsCureTile = true;
+        IsDecontamTile = true;
     }
-
+    
     //----------------------------------------------------------------------------//
     //                             TILE MOVEMENT                                  //
     //----------------------------------------------------------------------------//
@@ -205,10 +221,10 @@ public class Tile : MonoBehaviour
         }
 
         // Recheck edge tiles
-        if (  Index.Row == 0
-           || Index.Col == 0
-           || Index.Row == Map.Get.MapSizeVertical - 1
-           || Index.Col == Map.Get.MapSizeHorizontal - 1)
+        if ( Index.Row == 0
+          || Index.Col == 0
+          || Index.Row == Map.Get.MapSizeVertical - 1
+          || Index.Col == Map.Get.MapSizeHorizontal - 1)
         {
             IsEdgeTile = true;
         }
@@ -287,10 +303,10 @@ public class Tile : MonoBehaviour
         }
 
         // Recheck edge tiles
-        if (  Index.Row == 0 
-           || Index.Col == 0
-           || Index.Row == Map.Get.MapSizeVertical - 1 
-           || Index.Col == Map.Get.MapSizeHorizontal - 1)
+        if ( Index.Row == 0 
+          || Index.Col == 0
+          || Index.Row == Map.Get.MapSizeVertical - 1 
+          || Index.Col == Map.Get.MapSizeHorizontal - 1)
         {
             IsEdgeTile = true;
             // Rotate texture to face correct direction
@@ -375,11 +391,11 @@ public class Tile : MonoBehaviour
     }
 
     //----------------------------------------------------------------------------//
-    //                                  DOORS                                     //
+    //                             DOORS & EXITS                                  //
     //----------------------------------------------------------------------------//
 
     // Check to see which edges have doors and store references 
-    private void LoadDoors()
+    private void LoadDoorsAndExits()
     {
         doors = new GameObject[4];
         Transform checkDoor;
@@ -388,21 +404,25 @@ public class Tile : MonoBehaviour
         if (checkDoor != null)
         {
             doors[(int) Direction.North] = checkDoor.gameObject;
+            Exits[(int) Direction.North] = Direction.North;
         }
         checkDoor = transform.FindChild("Door_E");
         if (checkDoor != null)
         {
             doors[(int) Direction.East] = checkDoor.gameObject;
+            Exits[(int) Direction.East] = Direction.East;
         }
         checkDoor = transform.FindChild("Door_S");
         if (checkDoor != null)
         {
             doors[(int) Direction.South] = checkDoor.gameObject;
+            Exits[(int) Direction.South] = Direction.South;
         }
         checkDoor = transform.FindChild("Door_W");
         if (checkDoor != null)
         {
             doors[(int) Direction.West] = checkDoor.gameObject;
+            Exits[(int) Direction.West] = Direction.West;
         }
 
         ToggleAllDoors(false);  // Turn off all doors at the start

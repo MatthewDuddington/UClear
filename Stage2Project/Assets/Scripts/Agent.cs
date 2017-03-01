@@ -18,12 +18,11 @@ public class Agent : MonoBehaviour
 
     static private WaitForSeconds waitForDecisionTick = new WaitForSeconds(0.3f); // How long to wait between checking the AI decision loop
     static private WaitForSeconds waitForExplosionCountDownTime = new WaitForSeconds(3f);  // How long to wait before exploding
+    static private WaitForSeconds waitForLeaderTrailTick = new WaitForSeconds(1f);  // How long to wait between logging new leader trail positions
 
     static private GameObject agentPrefab;  // Remove once randomised function written
 
     public RaycastHit[] hits { get; private set; }  // A record of the most recent objects hit by the decision check
-
-    private Vector3 gravity;  // Keep a constant value for gravity to avoid recalculating each time
 
     public Vector3 FlockForce       { get; set; }
     public Vector3 WanderForce      { get; set; }
@@ -40,10 +39,13 @@ public class Agent : MonoBehaviour
     private Agent leaderToFollow;
     private Vector3[] trail;
     private Tile currentTile;
+    private Tile targetTile;
 
     private Rigidbody mBody;
 
-    private bool shouldExpload;
+    private Vector3 gravity;  // Keep a constant value for gravity to avoid recalculating each time
+    
+    private bool shouldExpload;  // 
 
     // TODO Load in different agent bodyparts and return a randomised character
     static public GameObject GenerateRandomAgentDesign()
@@ -69,7 +71,6 @@ public class Agent : MonoBehaviour
 
         ActiveAgentsCount++;
         Reset();
-//        StartCoroutine(Co_DecisionTick());  // TODO Remove
     }
 
     void Start()
@@ -106,21 +107,55 @@ public class Agent : MonoBehaviour
         StartCoroutine(Co_DecisionTick());  // Run behaviour machine
     }
 
+    public void Decontaminate()
+    {
+        // Playsound
+        Reset();
+        
+        if(OnDecontamination != null)
+        {
+            OnDecontamination();
+        }
+    }
+
+    public void ArriveAtTile(Tile tileArrivedAt)
+    {
+        currentTile = tileArrivedAt;
+    }
+
     // Coroutiene behaviour machine, handling global awareness and state switching
     private IEnumerator Co_DecisionTick()
     {
         while (mState != BehaviourState.Disabled)
         {
-            if ( leaderToFollow == null
+            if ( !isLeader
+              && leaderToFollow == null
               || (leaderToFollow.transform.position - transform.position).sqrMagnitude > leaderCheckRadius * leaderCheckRadius)
             {
-                if (CheckForLeader())
+                if (FindALeader())
                 {
                     // If no valid leader then become one
                     isLeader = true;
-                    currentTile = WhichTileIsBelowMe();
+                    leaderToFollow = null;
+                    StartCoroutine(Co_LeaderTrailTick());
                 }
             }
+            else
+            {
+                // Can I see the player
+                if (CanISeeTarget(Player.Get.gameObject))
+                {
+                    // Hunt the player
+                }
+                else if (currentTile == targetTile)
+                {
+                    // What are the avilable exits from this tile
+                    // Choose a random exit, excluding the previous tile visited
+                }
+            }
+
+//            currentTile = WhichTileIsBelowMe();
+
 
 //            for (int i = 0; i < 16; i++)
 //            {
@@ -152,47 +187,37 @@ public class Agent : MonoBehaviour
         }
         else
         {
-            // Can I see the player
-            if (CanISeeTarget(Player.Get.gameObject))
-            {
-                // Hunt the player
-            }
-            else
-            {
-                // Wander between tiles
-                // What are the avilable exuts from this tile
-                // Choose a random exit, excluding the previous tile visited
-            }
+            // Wander towards target tile
         }
 
 
 
 
 
-        // Add forces according to desision state
-        Vector3 totalForce = Vector3.zero;
-
-        mHunt.UpdateBehaviour();  // Check if player has been seen and calculate steering force contribution
-        totalForce += HuntForce;
-
-        if (mState == BehaviourState.Wandering)
-        {
-            totalForce += FlockForce;
-
-            totalForce += WanderForce;
-
-            mAvoid.UpdateBehaviour();
-            totalForce += AvoidWallsForce;
-        }
-
-        Vector3 steeringForce = totalForce - new Vector3(mBody.velocity.x, 0, mBody.velocity.z);
-
-//        steeringForce = Vector3.ClampMagnitude(steeringForce, MaxSpeed);
-
-        mBody.velocity = mBody.velocity + steeringForce + (gravity * Time.fixedDeltaTime);
+//        // Add forces according to desision state
+//        Vector3 totalForce = Vector3.zero;
+//
+//        mHunt.UpdateBehaviour();  // Check if player has been seen and calculate steering force contribution
+//        totalForce += HuntForce;
+//
+//        if (mState == BehaviourState.Wandering)
+//        {
+//            totalForce += FlockForce;
+//
+//            totalForce += WanderForce;
+//
+//            mAvoid.UpdateBehaviour();
+//            totalForce += AvoidWallsForce;
+//        }
+//
+//        Vector3 steeringForce = totalForce - new Vector3(mBody.velocity.x, 0, mBody.velocity.z);
+//
+////        steeringForce = Vector3.ClampMagnitude(steeringForce, MaxSpeed);
+//
+//        mBody.velocity = mBody.velocity + steeringForce + (gravity * Time.fixedDeltaTime);
     }
 
-    private IEnumerator LeaderTick()
+    private IEnumerator Co_LeaderTrailTick()
     {
         while (isLeader)
         {
@@ -205,12 +230,12 @@ public class Agent : MonoBehaviour
             // Add the current location to the newest slot in the trail
             trail[4] = transform.position;
 
-
+            yield return waitForLeaderTrailTick;
         }
     }
 
     // Check for a Leader to follow
-    private bool CheckForLeader()
+    private bool FindALeader()
     {
         for (int i = 0; i < ActiveAgentsCount; i++)
         {
@@ -229,17 +254,6 @@ public class Agent : MonoBehaviour
         }
         // Or if there is no valid leader
         return false;
-    }
-
-    public void Decontaminate()
-    {
-        // Playsound
-        Reset();
-
-        if(OnDecontamination != null)
-        {
-            OnDecontamination();
-        }
     }
 
     // Cast a ray at the target and check whether there is another object in the way

@@ -36,18 +36,18 @@ public struct GridIndex
 public class Map : MonoBehaviour
 {
     // Easy accessor for the class instance
-    private static Map map_;
+    private static Map This;
     public static Map Get
     { 
         get
         {
-            if (map_ == null)
+            if (This == null)
             {
                 Debug.LogError("No Map present in scene");
             }
-            return map_;
+            return This;
         }
-        private set { map_ = value; }
+        private set { This = value; }
     } 
 
     public enum TileType
@@ -255,7 +255,7 @@ public class Map : MonoBehaviour
 
         AgentSpawnLocation = spawnTile.transform.position + (Vector3.up * 1.2f);
         spawnTile.SetAsSpawnLocation();
-        cureTile.SetAsCureLocation();
+        cureTile.SetAsDecontaminationLocation();
     }
 
     public void SlideTiles(GridIndex initiatingTileIndex)
@@ -303,7 +303,9 @@ public class Map : MonoBehaviour
 
         // Lock facing door on tiles adjacent to the one being lifted and to the gap at the end of the row:
         // Tile North of lifted and South of gap
-        if (direction == Tile.Direction.South || direction == Tile.Direction.East || direction == Tile.Direction.West)
+        if ( direction == Tile.Direction.South
+          || direction == Tile.Direction.East
+          || direction == Tile.Direction.West)
         {
             tileGrid[tiles[0].Index.Row - 1, tiles[0].Index.Col].TriggerSafetyDoor(Tile.Direction.South);
             if (direction != Tile.Direction.South)
@@ -312,7 +314,9 @@ public class Map : MonoBehaviour
             }
         }
         // Tile South of lifted and North of gap
-        if (direction == Tile.Direction.North || direction == Tile.Direction.East || direction == Tile.Direction.West)
+        if ( direction == Tile.Direction.North
+          || direction == Tile.Direction.East
+          || direction == Tile.Direction.West)
         {
             tileGrid[tiles[0].Index.Row + 1, tiles[0].Index.Col].TriggerSafetyDoor(Tile.Direction.North);
             if (direction != Tile.Direction.North)
@@ -321,7 +325,9 @@ public class Map : MonoBehaviour
             }
         }
         // Tile West of lifted and East of gap
-        if (direction == Tile.Direction.East || direction == Tile.Direction.North || direction == Tile.Direction.South)
+        if ( direction == Tile.Direction.East
+          || direction == Tile.Direction.North
+          || direction == Tile.Direction.South)
         {
             tileGrid[tiles[0].Index.Row, tiles[0].Index.Col - 1].TriggerSafetyDoor(Tile.Direction.West);
             if (direction != Tile.Direction.East)
@@ -330,7 +336,9 @@ public class Map : MonoBehaviour
             }
         }
         // Tile East of lifted and West of gap
-        if (direction == Tile.Direction.West || direction == Tile.Direction.North || direction == Tile.Direction.South)
+        if ( direction == Tile.Direction.West
+          || direction == Tile.Direction.North
+          || direction == Tile.Direction.South)
         {
             tileGrid[tiles[0].Index.Row, tiles[0].Index.Col + 1].TriggerSafetyDoor(Tile.Direction.East);
             if (direction != Tile.Direction.West)
