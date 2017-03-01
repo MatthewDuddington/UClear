@@ -39,10 +39,12 @@ public class ScreenManager : MonoBehaviour
             mScreens[screen].enabled = false;
         }
 
-        Agent.OnDecontamination += Agent_OnDecontamination();
+        GameManager.OnRadiationDamage += GameManager_OnRadiationDamage;
+        Agent.OnDecontamination += Agent_OnDecontamination;
         
-        RadiationBar = GameObject.Find("RadiationBar").GetComponent<Image>();
-        DecontamBar = GameObject.Find("DecontamBar").GetComponent<Image>();
+        RadiationBar  = GameObject.Find("RadiationBar").GetComponent<Image>();
+        DecontamBar   = GameObject.Find("DecontamBar").GetComponent<Image>();
+        DecontamMarks = GameObject.Find("DecontamMarks").GetComponent<Image>();
 
         mCurrentScreen = Screens.TitleScreen;
     }
@@ -82,7 +84,12 @@ public class ScreenManager : MonoBehaviour
     public void FillDecontamMeter()
     {
         DecontamBar.fillAmount += 1 / GameManager.Get.numberOfResearchersToWin;
-        DecontamMarks.fillAmount = 1/DecontamBar.fillAmount;
+        DecontamMarks.fillAmount = 1 / DecontamBar.fillAmount;
+    }
+
+    private void GameManager_OnRadiationDamage(int radiationAmount)
+    {
+        FillRadiationMeter(radiationAmount);
     }
 
     private void Agent_OnDecontamination()

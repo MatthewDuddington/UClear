@@ -22,7 +22,7 @@ public class Agent : MonoBehaviour
 
     static private GameObject agentPrefab;  // Remove once randomised function written
 
-    public RaycastHit[] hits { get; private set; }  // A record of the most recent objects hit by the decision check
+    public RaycastHit [] hits { get; private set; }  // A record of the most recent objects hit by the decision check
 
     public Vector3 FlockForce       { get; set; }
     public Vector3 WanderForce      { get; set; }
@@ -36,16 +36,20 @@ public class Agent : MonoBehaviour
 
     public bool isLeader { get; private set; }
     private float leaderCheckRadius = 14;
-    private Agent leaderToFollow;
-    private Vector3[] trail;
-    private Tile currentTile;
-    private Tile targetTile;
+    public Agent leaderToFollow;  //TODO change to private
+    private Vector3 [] trail;
+    public Tile currentTile;  // TODO change to private
+    public Tile targetTile;  // TODO Change to private
 
     private Rigidbody mBody;
 
     private Vector3 gravity;  // Keep a constant value for gravity to avoid recalculating each time
-    
+    [SerializeField]
+    private float Speed;
+
     private bool shouldExpload;  // 
+
+    public Vector3 VVelocity; // TODO remove temporary for visualising velocity
 
     // TODO Load in different agent bodyparts and return a randomised character
     static public GameObject GenerateRandomAgentDesign()
@@ -63,6 +67,8 @@ public class Agent : MonoBehaviour
         mBody = gameObject.GetComponent<Rigidbody>();
         ColliderRadius = GetComponent<CapsuleCollider>().radius;
         hits = new RaycastHit[16];
+
+        trail = new Vector3[5];
 
         mHunt = GetComponent<HuntPlayer>();
         mFlock = GetComponent<FlockWithGroup>();
@@ -98,6 +104,14 @@ public class Agent : MonoBehaviour
         gameObject.SetActive(true);  // Enable components
         ActiveAgentsCount++;         // Add to count of agents in play
 
+        if (ActiveAgentsCount == 1)
+        {
+            isLeader = true;
+        }
+
+        currentTile = Map.Get.AgentSpawnTile;
+        targetTile = Map.Get.AgentSpawnTile;
+
         // Place agent on spawn point
         mBody.MovePosition(Map.Get.AgentSpawnLocation);
         mBody.MoveRotation(Quaternion.identity);
@@ -128,41 +142,45 @@ public class Agent : MonoBehaviour
     {
         while (mState != BehaviourState.Disabled)
         {
-            if ( !isLeader
-              && leaderToFollow == null
-              || (leaderToFollow.transform.position - transform.position).sqrMagnitude > leaderCheckRadius * leaderCheckRadius)
+            if (!isLeader)
             {
-                if (FindALeader())
+                if ( leaderToFollow == null
+                  || (leaderToFollow.transform.position - transform.position).sqrMagnitude > leaderCheckRadius * leaderCheckRadius)
                 {
-                    // If no valid leader then become one
-                    isLeader = true;
-                    leaderToFollow = null;
-                    StartCoroutine(Co_LeaderTrailTick());
+                    if (!FindALeader())
+                    {
+                        // If no valid leader then become one
+                        isLeader = true;
+                        leaderToFollow = null;
+                        StartCoroutine(Co_LeaderTrailTick());
+                    }
                 }
             }
             else
             {
                 // Can I see the player
-                if (CanISeeTarget(Player.Get.gameObject))
+                if (IsTargetVisible(Player.Get.gameObject))
                 {
                     // Hunt the player
+                    print("I CAN SEE THE PLAYER... CHARGE!!!");
                 }
                 else if (currentTile == targetTile)
                 {
                     // What are the avilable exits from this tile
                     int numberOfAvailableExits = currentTile.ExitTiles.Length;
-                    if ( numberOfAvailableExits = 0
-                      && !shouldExpload)
+                    if ( numberOfAvailableExits == 0
+                      && !shouldExpload
+                      && currentTile != Map.Get.AgentSpawnTile)
                     {
                         // If there are no exits the leader should start timer on exploading (from the stress of not knowing where to go!)
                         StartCoroutine(Co_PrepareToExpload());
                     }
-                    else if (numberOfAvailableExits = 1)
+                    else if (numberOfAvailableExits == 1)
                     {
                         // Only going backwards is available so go back to previous tile
                         targetTile = currentTile.ExitTiles[0];
                     }
-                    else if (numberOfAvailableExits = 2)
+                    else if (numberOfAvailableExits == 2)
                     {
                         // Only one new tile is available so choose that one
                         for (int i = 0; i < numberOfAvailableExits; i++)
@@ -173,7 +191,7 @@ public class Agent : MonoBehaviour
                             }
                         }
                     }
-                    else
+                    else if (numberOfAvailableExits > 2)
                     {
                         // Choose a random exit, excluding the previous tile visited
                         int randomExitIndex = 0;
@@ -218,19 +236,26 @@ public class Agent : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!isLeader)
+        if (mState != BehaviourState.Disabled)
         {
-            // Follow the leader
-            Vector3 targetPos = leaderToFollow.WhereShouldIGo(transform.position);
-            // Move in direction of target
-        }
-        else
-        {
-            // Wander towards target tile
-        }
+            Vector3 targetPos;
+            if (!isLeader)
+            {
+                // Follow the leader
+                targetPos = leaderToFollow.WhereShouldIGo(transform.position);
+                // Move in direction of target
+            }
+            else
+            {
+                // Wander towards target tile
+                targetPos = targetTile.transform.position;
+            }
+            Vector3 seekForce = (-transform.position + targetPos).normalized;
+            seekForce *= Speed;
 
+            mBody.velocity = mBody.velocity + seekForce + (gravity * Time.fixedDeltaTime);
 
-
+            VVelocity = mBody.velocity;
 
 
 //        // Add forces according to desision state
@@ -254,6 +279,7 @@ public class Agent : MonoBehaviour
 ////        steeringForce = Vector3.ClampMagnitude(steeringForce, MaxSpeed);
 //
 //        mBody.velocity = mBody.velocity + steeringForce + (gravity * Time.fixedDeltaTime);
+        }
     }
 
     private IEnumerator Co_LeaderTrailTick()
@@ -284,7 +310,7 @@ public class Agent : MonoBehaviour
             // Is that leader reachable
             if ( (potentialLeader.transform.position - transform.position).sqrMagnitude <= leaderCheckRadius * leaderCheckRadius
               && potentialLeader.isLeader
-              && CanISeeTarget(potentialLeader.gameObject))
+              && IsTargetVisible(potentialLeader.gameObject))
             {
                 // Follow that leader
                 leaderToFollow = potentialLeader;
@@ -296,7 +322,7 @@ public class Agent : MonoBehaviour
     }
 
     // Cast a ray at the target and check whether there is another object in the way
-    private bool CanISeeTarget(GameObject target)
+    private bool IsTargetVisible(GameObject target)
     {
         Vector3 differenceVector = target.transform.position - transform.position;
         RaycastHit hit;
@@ -330,12 +356,18 @@ public class Agent : MonoBehaviour
 
         // TODO Warn player about to expload
         // TODO Playsound "Oh no!"
+        print("OH NO!!!");
         // TODO Scale up
+        transform.localScale = Vector3.one * 3;
 
         yield return waitForExplosionCountDownTime;
         if (shouldExpload)
         {
             Expload();
+        }
+        else
+        {
+            transform.localScale = Vector3.one;
         }
     }
 

@@ -79,6 +79,7 @@ public class Map : MonoBehaviour
     private Tile [,] tileGrid;
 
     public Vector3 AgentSpawnLocation { get; private set; }
+    public Tile AgentSpawnTile { get; private set; }
 
     void Awake()
     {
@@ -217,45 +218,43 @@ public class Map : MonoBehaviour
     private void RandomiseGameLocations()
     {
         int randomCornerIndex = Random.Range(0, 4);
-        Tile spawnTile;
-        Tile cureTile;
+        Tile decontamTile;
         switch (randomCornerIndex)
         {
             case 0:
             {
-                spawnTile = tileGrid[0, 0];
-                cureTile = tileGrid[MapSizeVertical - 1, MapSizeHorizontal - 1];
+                AgentSpawnTile = tileGrid[0, 0];
+                decontamTile = tileGrid[MapSizeVertical - 1, MapSizeHorizontal - 1];
                 break;
             }
             case 1:
             {
-                spawnTile = tileGrid[0, MapSizeHorizontal - 1];
-                cureTile = tileGrid[MapSizeVertical - 1, 0];
+                AgentSpawnTile = tileGrid[0, MapSizeHorizontal - 1];
+                decontamTile = tileGrid[MapSizeVertical - 1, 0];
                 break;
             }
             case 2:
             {
-                spawnTile = tileGrid[MapSizeVertical - 1, 0];
-                cureTile = tileGrid[0, MapSizeHorizontal - 1];
+                AgentSpawnTile = tileGrid[MapSizeVertical - 1, 0];
+                decontamTile = tileGrid[0, MapSizeHorizontal - 1];
                 break;
             }
             case 3:
             {
-                spawnTile = tileGrid[MapSizeVertical - 1, MapSizeHorizontal - 1];
-                cureTile = tileGrid[0, 0];
+                AgentSpawnTile = tileGrid[MapSizeVertical - 1, MapSizeHorizontal - 1];
+                decontamTile = tileGrid[0, 0];
                 break;
             }
-            default:  // Should never reach here but compiler complains if spawnTile and cureTile are unassigned
+            default:  // Should never reach here but compiler complains if cureTile is unassigned
             {
-                spawnTile = new Tile();
-                cureTile = new Tile();
+                decontamTile = new Tile();
                 break;
             }
         }
 
-        AgentSpawnLocation = spawnTile.transform.position + (Vector3.up * 1.2f);
-        spawnTile.SetAsSpawnLocation();
-        cureTile.SetAsDecontaminationLocation();
+        AgentSpawnLocation = AgentSpawnTile.transform.position + (Vector3.up * 1.2f);
+        AgentSpawnTile.SetAsSpawnLocation();
+        decontamTile.SetAsDecontaminationLocation();
     }
 
     public void SlideTiles(GridIndex initiatingTileIndex)
@@ -366,20 +365,38 @@ public class Map : MonoBehaviour
         {
             case Tile.Direction.North:
             {
-                return tileGrid[homeTile.Index.Row - 1, homeTile.Index.Col    ];
+                if (homeTile.Index.Row != 0)
+                {
+                    return tileGrid[homeTile.Index.Row - 1, homeTile.Index.Col    ];
+                }
+                break;
             }
             case Tile.Direction.East:
             {
-                return tileGrid[homeTile.Index.Row    , homeTile.Index.Col + 1]; 
+                if (homeTile.Index.Col != Map.Get.MapSizeHorizontal - 1)
+                {
+                    return tileGrid[homeTile.Index.Row    , homeTile.Index.Col + 1];
+                }
+                break;
             }
             case Tile.Direction.South:
             {
-                return tileGrid[homeTile.Index.Row + 1, homeTile.Index.Col    ];
+                if (homeTile.Index.Row != Map.Get.MapSizeVertical - 1)
+                {
+                    return tileGrid[homeTile.Index.Row + 1, homeTile.Index.Col    ];
+                }
+                break;
             }
             case Tile.Direction.West:
             {
-                return tileGrid[homeTile.Index.Row    , homeTile.Index.Col - 1];
+                if (homeTile.Index.Col != 0)
+                {
+                    return tileGrid[homeTile.Index.Row    , homeTile.Index.Col - 1];
+                }
+                break;
             }
         }
+
+        return null;  // Should never reach here but compiler requires complete return code path
     }
 }

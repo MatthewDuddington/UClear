@@ -29,7 +29,7 @@ GameObject:
   - component: {fileID: 114174255192704150}
   m_Layer: 2
   m_Name: Boffin_M
-  m_TagString: Boffin
+  m_TagString: Agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

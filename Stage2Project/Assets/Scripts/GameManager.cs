@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public delegate void GameEvent();
+    public delegate void GameEvent(int value);
     public static event GameEvent OnRadiationDamage;
 
     // Easy accessor for the class instance
@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
         private set { This = value; }
     } 
 
-    public enum State { Paused, Playing }
+    public enum State { Paused, Playing, GameOver }
 
     public float gravity = 9.8f;
 
@@ -80,7 +80,7 @@ public class GameManager : MonoBehaviour
     {
 //        Arena.Calculate();
         PreLoadAgents();
-        mPlayer.enabled = false;
+        mPlayer.gameObject.SetActive(false);
         mState = State.Paused;
 //        mPlayer.gameObject.SetActive(true);
 //        mState = State.Playing;
@@ -103,10 +103,15 @@ public class GameManager : MonoBehaviour
         StartCoroutine(Co_SpawnAgents());
     }
 
+    private void PauseGame()
+    {
+        mState = State.Paused;
+    }
+
     private void EndGame()
     {
         mPlayer.gameObject.SetActive(false);
-        mState = State.Paused;
+        mState = State.GameOver;
     }
 
     // When subscribed events are triggered in ScreenManager, Begin or End the game
@@ -128,6 +133,7 @@ public class GameManager : MonoBehaviour
             GameObject spawnAgent = Agent.GenerateRandomAgentDesign();
             GameObject spawnedInstance = Instantiate(spawnAgent, Vector3.down * 100, Quaternion.identity);
             Agent spawnedAgent = spawnedInstance.gameObject.GetComponent<Agent>();
+            spawnedAgent.transform.SetParent(transform);
             mAgents[i] = spawnedAgent;
         }
     }
@@ -141,7 +147,7 @@ public class GameManager : MonoBehaviour
             Collider[] spawnCollisions = Physics.OverlapSphere(Map.Get.AgentSpawnLocation, Agent.ColliderRadius);
             foreach (Collider other in spawnCollisions)
             {
-                if (other.CompareTag("Boffin"))
+                if (other.CompareTag("Agent"))
                 {
                     shouldSpawn = false;
                 }
@@ -155,9 +161,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void AddRadiation(int radiationAmount)
+    public void RadiationDamage(int radiationAmount)
     {
-
+        if (OnRadiationDamage != null)
+        {
+            OnRadiationDamage(radiationAmount);
+        }
     }
 
     private IEnumerator RadiationTick()
@@ -165,7 +174,7 @@ public class GameManager : MonoBehaviour
         while (mState == State.Playing)
         {
             yield return waitForRadiationTick;
-            AddRadiation(1);
+            RadiationDamage(1);
         }
     }
 }
