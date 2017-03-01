@@ -28,7 +28,6 @@ public class Tile : MonoBehaviour
     private static Material mainMaterial;
     private static Material slideableMaterial;
     private static Material hoverMaterial;
-    private static Material spawnLocationMaterial;
     private static Material cureLocationMaterial;
     private static Material cureLocationWallMaterial;
 
@@ -45,9 +44,6 @@ public class Tile : MonoBehaviour
         mainMaterial = Resources.Load<Material>("TileMainMaterial");
         slideableMaterial = Resources.Load<Material>("TileSlideableMaterial");
         hoverMaterial = Resources.Load<Material>("TileHoverMaterial");
-        spawnLocationMaterial = Resources.Load<Material>("TileSpawnLocationMaterial");
-        cureLocationMaterial = Resources.Load<Material>("TileCureLocationMaterial");
-        cureLocationWallMaterial = Resources.Load<Material>("WallDecontamination");
 
         mBody = GetComponent<Rigidbody>();
         mFloor = transform.GetChild(0).gameObject;
@@ -78,27 +74,33 @@ public class Tile : MonoBehaviour
         return this;
     }
 
-    // Simple hover indication for now TODO Use an outline instead
+    // Simple hover indication for now
     void OnMouseEnter()
     {
-        if (IsEdgeTile && IsMovable)
-        { 
-            mRenderer.material = hoverMaterial;
+        if(GameManager.Get.mState == GameManager.State.Playing)
+        {
+            if (IsEdgeTile && IsMovable)
+            { 
+                mRenderer.material = hoverMaterial;
+            }
         }
     }
 
     void OnMouseExit()
     {
-        if (IsEdgeTile && IsMovable)
+        if(GameManager.Get.mState == GameManager.State.Playing)
         {
-            if (mRenderer.material != mainMaterial && ActiveTile != this)
-            { 
-                mRenderer.material = slideableMaterial;
+            if (IsEdgeTile && IsMovable)
+            {
+                if (mRenderer.material != mainMaterial && ActiveTile != this)
+                { 
+                    mRenderer.material = slideableMaterial;
+                }
             }
-        }
-        else if (!IsSpawnTile && !IsCureTile)
-        { 
-            mRenderer.material = mainMaterial;
+            else if (!IsSpawnTile && !IsCureTile)
+            { 
+                mRenderer.material = mainMaterial;
+            }
         }
     }
 
@@ -130,14 +132,20 @@ public class Tile : MonoBehaviour
     // Set visual for Spawn tile
     public void SetAsSpawnLocation()
     {
-        mRenderer.material = spawnLocationMaterial;
+        mRenderer.material = Resources.Load<Material>("TileSpawnLocationMaterial");
+        Material radiationWallMaterial = Resources.Load<Material>("WallRadiationMaterial");
+        for (int i = 1; i <= 3; i++)
+        {
+            transform.GetChild(i).GetComponent<Renderer>().material = radiationWallMaterial;
+        }
         IsSpawnTile = true;
     }
 
     // Set visual for Decontamination tile
     public void SetAsCureLocation()
     {
-        mRenderer.material = cureLocationMaterial;
+        mRenderer.material = Resources.Load<Material>("TileCureLocationMaterial");
+        Material cureLocationWallMaterial = Resources.Load<Material>("WallDecontaminationMaterial");
         for (int i = 1; i <= 3; i++)
         {
             transform.GetChild(i).GetComponent<Renderer>().material = cureLocationWallMaterial;
@@ -218,28 +226,7 @@ public class Tile : MonoBehaviour
         }
 
         // Fix any transform drift
-        float horizontalDrift = transform.position.x % moveDistance;
-        if (horizontalDrift >= Size)
-        { 
-            horizontalDrift = moveDistance - horizontalDrift;
-        }
-        else if (horizontalDrift <= -Size)
-        { 
-            horizontalDrift = -(moveDistance + horizontalDrift);
-        }
-
-        float verticalDrift = transform.position.z % moveDistance;
-        if (verticalDrift >= Size)
-        {
-            verticalDrift = moveDistance - verticalDrift;
-        }
-        else if (verticalDrift <= -Size)
-        {
-            verticalDrift = -(moveDistance + verticalDrift);
-        }
-
-        Vector3 transformDrift = new Vector3(horizontalDrift, transform.position.y, verticalDrift);
-        mBody.MovePosition(transform.position - transformDrift);
+        FixDrift();
 
         // Set slideable colour for new edge tiles (
         if (Index.Row == 0)
@@ -352,6 +339,15 @@ public class Tile : MonoBehaviour
         ToggleAllDoors(false);  // Reopen doors after landing
 
         // Fix any transform drift
+        FixDrift();
+
+        areSliding = false;  // Re-enable other movements
+    }
+
+    // Fix small transform drifts by moving back by any remainer after dividing by move distances.
+    // TODO Rarely a small dift still occours and this fix just amplifies it?
+    private void FixDrift()
+    {
         float horizontalDrift = transform.position.x % moveDistance;
         print(horizontalDrift);
         if (horizontalDrift >= Size)
@@ -376,8 +372,6 @@ public class Tile : MonoBehaviour
 
         Vector3 transformDrift = new Vector3(horizontalDrift, transform.position.y, verticalDrift);
         mBody.MovePosition(transform.position - transformDrift);
-
-        areSliding = false;  // Re-enable other movements
     }
 
     //----------------------------------------------------------------------------//

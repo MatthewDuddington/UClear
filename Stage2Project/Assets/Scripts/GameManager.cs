@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour
 
     private Agent [] mAgents;  // Changed mObjects List to mAgents Array to reflect its use in this game and known size
     private Player mPlayer;
-    private State mState;
+    public State mState { get; private set; }
     private float mNextSpawn;
 
 
@@ -78,13 +78,46 @@ public class GameManager : MonoBehaviour
     {
 //        Arena.Calculate();
         PreLoadAgents();
-//        mPlayer.enabled = false;
-//        mState = State.Paused;
-        mPlayer.gameObject.SetActive(true);
+        mPlayer.enabled = false;
+        mState = State.Paused;
+//        mPlayer.gameObject.SetActive(true);
+//        mState = State.Playing;
+//        StartCoroutine(Co_SpawnAgents());
+    }
+
+    private void BeginNewGame()
+    {
+        for (int count = 0; count < Agent.ActiveAgentsCount; ++count)
+        {
+            mAgents[count].Reset();  // Disable and reset rather than Destroy to avoid realocating memeory
+        }
+
+        Map.Get.GenerateNewMap();
+
+        mPlayer.transform.position = new Vector3(0.0f, 0.5f, 0.0f);
+        mNextSpawn = TimeBetweenSpawns;
         mState = State.Playing;
+        mPlayer.gameObject.SetActive(true);
         StartCoroutine(Co_SpawnAgents());
     }
 
+    private void EndGame()
+    {
+        mPlayer.gameObject.SetActive(false);
+        mState = State.Paused;
+    }
+
+    // When subscribed events are triggered in ScreenManager, Begin or End the game
+    private void ScreenManager_OnNewGame()
+    {
+        BeginNewGame();
+    }
+
+    private void ScreenManager_OnExitGame()
+    {
+        EndGame();
+    }
+    
     // Changed ticking random spawn in Update function to instead pre-load a list of random agents
     private void PreLoadAgents()
     {
@@ -96,7 +129,7 @@ public class GameManager : MonoBehaviour
             mAgents[i] = spawnedAgent;
         }
     }
-
+    
     private IEnumerator Co_SpawnAgents()
     {
         while (mState == State.Playing && Agent.ActiveAgentsCount < numberOfAgentsToSpawn)
@@ -120,35 +153,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void BeginNewGame()
-    {
-        for (int count = 0; count < mAgents.Length; ++count)
-        {
-            mAgents[count].Reset();  // Disable and reset rather than Destroy to avoid realocating memeory
-        }
-
-        mPlayer.transform.position = new Vector3(0.0f, 0.5f, 0.0f);
-        mNextSpawn = TimeBetweenSpawns;
-        mPlayer.gameObject.SetActive(true);
-        mState = State.Playing;
-    }
-
-    private void EndGame()
-    {
-        mPlayer.gameObject.SetActive(false);
-        mState = State.Paused;
-    }
-
-    private void ScreenManager_OnNewGame()
-    {
-        BeginNewGame();
-    }
-
-    private void ScreenManager_OnExitGame()
-    {
-        EndGame();
-    }
-
     public void AddRadiation(int radiationAmount)
     {
 
@@ -156,7 +160,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator RadiationTick()
     {
-        while (State.Playing)
+        while (mState == State.Playing)
         {
             yield return waitForRadiationTick;
             AddRadiation(1);

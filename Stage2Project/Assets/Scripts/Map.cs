@@ -101,8 +101,19 @@ public class Map : MonoBehaviour
         tileGrid = new Tile[(int) MapSizeVertical, (int) MapSizeHorizontal];
     }
 
-    void Start()
+    public void GenerateNewMap()
     {
+        foreach (Tile tile in tileGrid)
+        {
+            if (tile != null)
+            {
+                GameObject.DestroyImmediate(tile.gameObject);  // TODO Consider disabling and reusing tiles from a pool rather than destroying and reinstantiating each time.
+            }
+        }
+
+        // Reset scale fix of the map. TODO Avoid having to do this
+        transform.localScale = Vector3.one;
+
         AddDefaultTiles();
         RandomiseMoveableTiles();
         PositionMap();

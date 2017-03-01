@@ -30,13 +30,9 @@ public class Agent : MonoBehaviour
     private Wander mWander;
     private AvoidWalls mAvoid;
 
-    [SerializeField]
-    private float MaxSpeed = 400;
-    [SerializeField]
-    private float TurningSpeed = 50;
-
     private Rigidbody mBody;
 
+    // TODO Load in different agent bodyparts and return a randomised character
     static public GameObject GenerateRandomAgentDesign()
     {
         if (agentPrefab == null)
@@ -147,7 +143,6 @@ public class Agent : MonoBehaviour
 //        steeringForce = Vector3.ClampMagnitude(steeringForce, MaxSpeed);
 
         mBody.velocity = mBody.velocity + steeringForce + (gravity * Time.fixedDeltaTime);
-        //mBody.AddForce(gravity);
 
         velocityV = mBody.velocity;
     }

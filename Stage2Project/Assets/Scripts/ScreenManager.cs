@@ -5,22 +5,33 @@ using UnityEngine.UI;
 
 public class ScreenManager : MonoBehaviour
 {
+//    // Easy accessor for the class instance
+//    private static ScreenManager screenManager_;
+//    public static ScreenManager Get
+//    { 
+//        get
+//        {
+//            if (screenManager_ == null)
+//            {
+//                Debug.LogError("No ScreenManager present in scene");
+//            }
+//            return screenManager_;
+//        }
+//        private set { screenManager_ = value; }
+//    } 
+
     public delegate void GameEvent();
     public static event GameEvent OnNewGame;
     public static event GameEvent OnExitGame;
-    public static event GameEvent OnRadiationDamage;
 
     public enum Screens { TitleScreen, GameScreen, ResultScreen, NumScreens }
-
+    
     private Canvas [] mScreens;
     private Screens mCurrentScreen;
 
-    private Image RadiationMeter;
-    private Image ResearchMeter;
-    private Image RadiationIcon;
-    private Image ResearchIcon;
     private Image RadiationBar;
-    private Image ResearchBar;
+    private Image DecontamMarks;
+    private Image DecontamBar;
 
     void Awake()
     {
@@ -42,9 +53,9 @@ public class ScreenManager : MonoBehaviour
         {
             mScreens[screen].enabled = false;
         }
-
-        RadiationMeter = GameObject.Find("RadiationMeter").GetComponent<Image>();
-        ResearchMeter = GameObject.Find("ResearchMeter").GetComponent<Image>();
+        
+        RadiationBar = GameObject.Find("RadiationBar").GetComponent<Image>();
+        DecontamBar = GameObject.Find("DecontamBar").GetComponent<Image>();
 
         mCurrentScreen = Screens.TitleScreen;
     }
@@ -78,11 +89,12 @@ public class ScreenManager : MonoBehaviour
 
     public void FillRadiationMeter(float amount)
     {
-        RadiationMeter.fillAmount += amount;
+        RadiationBar.fillAmount += amount;
     }
 
     public void FillResearchMeter()
     {
-        ResearchMeter.fillAmount += 1 / GameManager.Get.numberOfResearchersToWin;
+        DecontamBar.fillAmount += 1 / GameManager.Get.numberOfResearchersToWin;
+        DecontamMarks.fillAmount = 1/DecontamBar.fillAmount;
     }
 }
