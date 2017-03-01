@@ -150,7 +150,46 @@ public class Agent : MonoBehaviour
                 else if (currentTile == targetTile)
                 {
                     // What are the avilable exits from this tile
-                    // Choose a random exit, excluding the previous tile visited
+                    int numberOfAvailableExits = currentTile.ExitTiles.Length;
+                    if ( numberOfAvailableExits = 0
+                      && !shouldExpload)
+                    {
+                        // If there are no exits the leader should start timer on exploading (from the stress of not knowing where to go!)
+                        StartCoroutine(Co_PrepareToExpload());
+                    }
+                    else if (numberOfAvailableExits = 1)
+                    {
+                        // Only going backwards is available so go back to previous tile
+                        targetTile = currentTile.ExitTiles[0];
+                    }
+                    else if (numberOfAvailableExits = 2)
+                    {
+                        // Only one new tile is available so choose that one
+                        for (int i = 0; i < numberOfAvailableExits; i++)
+                        {
+                            if (currentTile.ExitTiles[i] != currentTile)
+                            {
+                                targetTile = currentTile.ExitTiles[i];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Choose a random exit, excluding the previous tile visited
+                        int randomExitIndex = 0;
+                        do
+                        {
+                            randomExitIndex = Random.Range(0, numberOfAvailableExits);
+                        } while (currentTile.ExitTiles[randomExitIndex] == currentTile);
+                        targetTile = currentTile.ExitTiles[randomExitIndex];
+                    }
+
+                    if ( shouldExpload
+                      && currentTile != targetTile)
+                    {
+                        // If a path is now available cancel any impending explosions
+                        shouldExpload = false;
+                    }
                 }
             }
 
@@ -285,7 +324,7 @@ public class Agent : MonoBehaviour
         return belowMe.collider.GetComponentInParent<Tile>();
     }
 
-    private IEnumerator PrepareToExpload()
+    private IEnumerator Co_PrepareToExpload()
     {
         shouldExpload = true;
 
