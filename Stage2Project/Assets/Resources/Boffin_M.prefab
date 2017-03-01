@@ -27,7 +27,7 @@ GameObject:
   - component: {fileID: 114916962071595942}
   - component: {fileID: 114976714310318088}
   - component: {fileID: 114174255192704150}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Boffin_M
   m_TagString: Boffin
   m_Icon: {fileID: 0}
@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 4946807969149898}
   - component: {fileID: 33339879993667494}
   - component: {fileID: 23852667687014414}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: ArmL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -61,7 +61,7 @@ GameObject:
   - component: {fileID: 4909742868611376}
   - component: {fileID: 33653873935001516}
   - component: {fileID: 23762625166932640}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: HairL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -78,7 +78,7 @@ GameObject:
   - component: {fileID: 4778819791241944}
   - component: {fileID: 33222522211465826}
   - component: {fileID: 23714496799969408}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: EyeL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 4099154413966596}
   - component: {fileID: 33641413947265946}
   - component: {fileID: 23540664212606812}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Moustache
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -112,7 +112,7 @@ GameObject:
   - component: {fileID: 4030093547722326}
   - component: {fileID: 33451192633396196}
   - component: {fileID: 23168788132304754}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129,7 +129,7 @@ GameObject:
   - component: {fileID: 4512042861385116}
   - component: {fileID: 33933779398281722}
   - component: {fileID: 23221787217009042}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Nose
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -146,7 +146,7 @@ GameObject:
   - component: {fileID: 4567491514766306}
   - component: {fileID: 33796293183240288}
   - component: {fileID: 23088420318888204}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: HairR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -163,7 +163,7 @@ GameObject:
   - component: {fileID: 4562654319003998}
   - component: {fileID: 33368209019366884}
   - component: {fileID: 23332820420515320}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: EyeR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -180,7 +180,7 @@ GameObject:
   - component: {fileID: 4280884454810486}
   - component: {fileID: 33059543858497082}
   - component: {fileID: 23800398860248928}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Head
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -197,7 +197,7 @@ GameObject:
   - component: {fileID: 4790205798552736}
   - component: {fileID: 33263073023520250}
   - component: {fileID: 23417001377426788}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: BodyDetail
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -214,7 +214,7 @@ GameObject:
   - component: {fileID: 4814175608455220}
   - component: {fileID: 33703348303183546}
   - component: {fileID: 23020461769253168}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: ArmR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -827,7 +827,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1188342545146432}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15ea9a52596374dd7afce5e66562d703, type: 3}
   m_Name: 
@@ -849,13 +849,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 841787886e79f4bd7b0735ab910c05eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FlockForce: {x: 0, y: 0, z: 0}
-  WanderForce: {x: 0, y: 0, z: 0}
-  AvoidWallsForce: {x: 0, y: 0, z: 0}
-  HuntForce: {x: 0, y: 0, z: 0}
-  MaxSpeed: 100
-  TurningSpeed: 50
-  velocityV: {x: 0, y: 0, z: 0}
 --- !u!114 &114824217848520630
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -892,7 +885,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1188342545146432}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b88559fd5a48a4a9fa084017e0b5189c, type: 3}
   m_Name: 
@@ -906,7 +899,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1188342545146432}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: afea2f0ddeaba45abac8cc2552b28b4c, type: 3}
   m_Name: 
