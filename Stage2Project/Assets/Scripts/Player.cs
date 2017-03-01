@@ -5,6 +5,21 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class Player : MonoBehaviour
 {
+    // Easy accessor for the class instance
+    private static Player This;
+    public static Player Get
+    { 
+        get
+        {
+            if (This == null)
+            {
+                Debug.LogError("No Player present in scene");
+            }
+            return This;
+        }
+        private set { This = value; }
+    } 
+
     [SerializeField]
     private float Speed;
 
@@ -12,6 +27,7 @@ public class Player : MonoBehaviour
 
     void Awake()
     {
+        This = this;
         mBody = GetComponent<Rigidbody>();
     }
 

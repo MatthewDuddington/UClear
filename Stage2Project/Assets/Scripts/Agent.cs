@@ -4,33 +4,46 @@ using UnityEngine;
 
 public class Agent : MonoBehaviour
 { 
+    public delegate void GameEvent();
+    public static event GameEvent OnDecontamination;
+    public static event GameEvent OnExpload;
+    public static event GameEvent OnEscape;
+
     public enum BehaviourState { Disabled, Wandering, Hunting }
     private BehaviourState mState;
 
-    static public int ActiveAgentsCount { get; private set; }
+    static public int ActiveAgentsCount { get; private set; }  // Keep track of how many of the preloaded agents are enabled
 
-    static public float ColliderRadius { get; private set; }
+    static public float ColliderRadius { get; private set; }  // Used to check whether it is safe to spawn
 
-    static private float desisionTickTime = 0.3f;
-    static private WaitForSeconds waitForDesisionTick = new WaitForSeconds(desisionTickTime);
+    static private WaitForSeconds waitForDecisionTick = new WaitForSeconds(0.3f); // How long to wait between checking the AI decision loop
+    static private WaitForSeconds waitForExplosionCountDownTime = new WaitForSeconds(3f);  // How long to wait before exploding
 
     static private GameObject agentPrefab;  // Remove once randomised function written
 
-    public RaycastHit[] hits { get; private set; }
+    public RaycastHit[] hits { get; private set; }  // A record of the most recent objects hit by the decision check
 
-    private Vector3 gravity;
+    private Vector3 gravity;  // Keep a constant value for gravity to avoid recalculating each time
 
-    public Vector3 FlockForce;  //{ get; set; }
-    public Vector3 WanderForce; //{ get; set; }
-    public Vector3 AvoidWallsForce; //{ get; set; }
-    public Vector3 HuntForce;   //{ get; set; }
+    public Vector3 FlockForce       { get; set; }
+    public Vector3 WanderForce      { get; set; }
+    public Vector3 AvoidWallsForce  { get; set; }
+    public Vector3 HuntForce        { get; set; }
 
     private HuntPlayer mHunt;
     private FlockWithGroup mFlock;
     private Wander mWander;
     private AvoidWalls mAvoid;
 
+    public bool isLeader { get; private set; }
+    private float leaderCheckRadius = 14;
+    private Agent leaderToFollow;
+    private Vector3[] trail;
+    private Tile currentTile;
+
     private Rigidbody mBody;
+
+    private bool shouldExpload;
 
     // TODO Load in different agent bodyparts and return a randomised character
     static public GameObject GenerateRandomAgentDesign()
@@ -98,28 +111,64 @@ public class Agent : MonoBehaviour
     {
         while (mState != BehaviourState.Disabled)
         {
-            for (int i = 0; i < 16; i++)
+            if ( leaderToFollow == null
+              || (leaderToFollow.transform.position - transform.position).sqrMagnitude > leaderCheckRadius * leaderCheckRadius)
             {
-                Vector3 rayDirection = new Vector3(Mathf.Cos(22.5f * i), 0, Mathf.Sin(22.5f * i));
-                Physics.Raycast(transform.position + Vector3.up, rayDirection, out hits[i]);
-                Debug.DrawRay(transform.position + Vector3.up, rayDirection, Color.blue, desisionTickTime);
+                if (CheckForLeader())
+                {
+                    // If no valid leader then become one
+                    isLeader = true;
+                    currentTile = WhichTileIsBelowMe();
+                }
             }
 
-            if (HuntForce.sqrMagnitude > 0)
-            {
-                mState = BehaviourState.Hunting;
-            }
-            else
-            {
-                mState = BehaviourState.Wandering;
-            }
+//            for (int i = 0; i < 16; i++)
+//            {
+//                Vector3 rayDirection = new Vector3(Mathf.Cos(22.5f * i), 0, Mathf.Sin(22.5f * i));
+//                Physics.Raycast(transform.position + Vector3.up, rayDirection, out hits[i]);
+//                Debug.DrawRay(transform.position + Vector3.up, rayDirection, Color.blue, decisionTickTime);
+//            }
+//
+//            if (HuntForce.sqrMagnitude > 0)
+//            {
+//                mState = BehaviourState.Hunting;
+//            }
+//            else
+//            {
+//                mState = BehaviourState.Wandering;
+//            }
 
-            yield return waitForDesisionTick;
+            yield return waitForDecisionTick;
         }
     }
 
     void FixedUpdate()
     {
+        if (!isLeader)
+        {
+            // Follow the leader
+            Vector3 targetPos = leaderToFollow.WhereShouldIGo(transform.position);
+            // Move in direction of target
+        }
+        else
+        {
+            // Can I see the player
+            if (CanISeeTarget(Player.Get.gameObject))
+            {
+                // Hunt the player
+            }
+            else
+            {
+                // Wander between tiles
+                // What are the avilable exuts from this tile
+                // Choose a random exit, excluding the previous tile visited
+            }
+        }
+
+
+
+
+
         // Add forces according to desision state
         Vector3 totalForce = Vector3.zero;
 
@@ -134,18 +183,116 @@ public class Agent : MonoBehaviour
 
             mAvoid.UpdateBehaviour();
             totalForce += AvoidWallsForce;
-
         }
 
-//        totalForce /= mBody.mass;
         Vector3 steeringForce = totalForce - new Vector3(mBody.velocity.x, 0, mBody.velocity.z);
 
 //        steeringForce = Vector3.ClampMagnitude(steeringForce, MaxSpeed);
 
         mBody.velocity = mBody.velocity + steeringForce + (gravity * Time.fixedDeltaTime);
-
-        velocityV = mBody.velocity;
     }
 
-    public Vector3 velocityV;  // TODO Temporary variable to display velocity
+    private IEnumerator LeaderTick()
+    {
+        while (isLeader)
+        {
+            // Update the trail
+            for (int i = 0; i < 4; i++)
+            {
+                // Move down the older locations towards the tail, removing the oldest
+                trail[i] = trail[i+1];
+            }
+            // Add the current location to the newest slot in the trail
+            trail[4] = transform.position;
+
+
+        }
+    }
+
+    // Check for a Leader to follow
+    private bool CheckForLeader()
+    {
+        for (int i = 0; i < ActiveAgentsCount; i++)
+        {
+            Agent potentialLeader = GameManager.Get.mAgents[i];
+            // Check all agents for being within valid proximity
+            // Are any of them a leader
+            // Is that leader reachable
+            if ( (potentialLeader.transform.position - transform.position).sqrMagnitude <= leaderCheckRadius * leaderCheckRadius
+              && potentialLeader.isLeader
+              && CanISeeTarget(potentialLeader.gameObject))
+            {
+                // Follow that leader
+                leaderToFollow = potentialLeader;
+                return true;
+            }
+        }
+        // Or if there is no valid leader
+        return false;
+    }
+
+    public void Decontaminate()
+    {
+        // Playsound
+        Reset();
+
+        if(OnDecontamination != null)
+        {
+            OnDecontamination();
+        }
+    }
+
+    // Cast a ray at the target and check whether there is another object in the way
+    private bool CanISeeTarget(GameObject target)
+    {
+        Vector3 differenceVector = target.transform.position - transform.position;
+        RaycastHit hit;
+        Physics.Raycast(transform.position, differenceVector.normalized, out hit, differenceVector.magnitude);
+        Debug.DrawLine(transform.position, target.transform.position, Color.red, 2f);
+        if (hit.collider.gameObject == target)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public Vector3 WhereShouldIGo(Vector3 followerPosition)
+    {
+        return trail[0];  // TODO check follower location against trail in case they are closer to the leader than the back of the trail and return the next closest
+    }
+
+    private Tile WhichTileIsBelowMe()
+    {
+        RaycastHit belowMe;
+        Physics.Raycast(transform.position + Vector3.up, Vector3.down, out belowMe);
+        return belowMe.collider.GetComponentInParent<Tile>();
+    }
+
+    private IEnumerator PrepareToExpload()
+    {
+        shouldExpload = true;
+
+        // TODO Warn player about to expload
+        // TODO Playsound "Oh no!"
+        // TODO Scale up
+
+        yield return waitForExplosionCountDownTime;
+        if (shouldExpload)
+        {
+            Expload();
+        }
+    }
+
+    private void Expload()
+    {
+        // TODO Playsound "pop!"
+        if(OnExpload != null)
+        {
+            OnExpload();
+        }
+        Reset();
+    }
 }

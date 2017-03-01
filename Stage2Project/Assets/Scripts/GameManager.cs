@@ -8,18 +8,18 @@ public class GameManager : MonoBehaviour
     public static event GameEvent OnRadiationDamage;
 
     // Easy accessor for the class instance
-    private static GameManager gameManager_;
+    private static GameManager This;
     public static GameManager Get
     { 
         get
         {
-            if (gameManager_ == null)
+            if (This == null)
             {
                 Debug.LogError("No GameManager present in scene");
             }
-            return gameManager_;
+            return This;
         }
-        private set { gameManager_ = value; }
+        private set { This = value; }
     } 
 
     public enum State { Paused, Playing }
@@ -50,17 +50,19 @@ public class GameManager : MonoBehaviour
 
     public int numberOfResearchersToWin = 10;
 
+    public Agent [] mAgents { get; private set; }  // Changed mObjects List to mAgents Array to reflect its use in this game and known size
+    public State mState { get; private set; }
+
     private int radiationLevel = 0;
 
-    private Agent [] mAgents;  // Changed mObjects List to mAgents Array to reflect its use in this game and known size
     private Player mPlayer;
-    public State mState { get; private set; }
+
     private float mNextSpawn;
 
 
     void Awake()
     {
-        gameManager_ = this;
+        This = this;
 
         mPlayer = Instantiate(PlayerPrefab);
         mPlayer.transform.parent = transform;

@@ -5,21 +5,6 @@ using UnityEngine.UI;
 
 public class ScreenManager : MonoBehaviour
 {
-//    // Easy accessor for the class instance
-//    private static ScreenManager screenManager_;
-//    public static ScreenManager Get
-//    { 
-//        get
-//        {
-//            if (screenManager_ == null)
-//            {
-//                Debug.LogError("No ScreenManager present in scene");
-//            }
-//            return screenManager_;
-//        }
-//        private set { screenManager_ = value; }
-//    } 
-
     public delegate void GameEvent();
     public static event GameEvent OnNewGame;
     public static event GameEvent OnExitGame;
@@ -53,6 +38,8 @@ public class ScreenManager : MonoBehaviour
         {
             mScreens[screen].enabled = false;
         }
+
+        Agent.OnDecontamination += Agent_OnDecontamination();
         
         RadiationBar = GameObject.Find("RadiationBar").GetComponent<Image>();
         DecontamBar = GameObject.Find("DecontamBar").GetComponent<Image>();
@@ -92,9 +79,14 @@ public class ScreenManager : MonoBehaviour
         RadiationBar.fillAmount += amount;
     }
 
-    public void FillResearchMeter()
+    public void FillDecontamMeter()
     {
         DecontamBar.fillAmount += 1 / GameManager.Get.numberOfResearchersToWin;
         DecontamMarks.fillAmount = 1/DecontamBar.fillAmount;
+    }
+
+    private void Agent_OnDecontamination()
+    {
+        FillDecontamMeter();
     }
 }
