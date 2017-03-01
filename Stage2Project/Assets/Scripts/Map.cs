@@ -358,4 +358,28 @@ public class Map : MonoBehaviour
             tileGrid[tiles[i].Index.Row, tiles[i].Index.Col] = tiles[i];
         }
     }
+
+    // Return a reference to the tile which neighbours the home tile in the given direction
+    public Tile TileNeighbour(Tile homeTile, Tile.Direction neighbourDirection)
+    {
+        switch (neighbourDirection)
+        {
+            case Tile.Direction.North:
+            {
+                return tileGrid[homeTile.Index.Row - 1, homeTile.Index.Col    ];
+            }
+            case Tile.Direction.East:
+            {
+                return tileGrid[homeTile.Index.Row    , homeTile.Index.Col + 1]; 
+            }
+            case Tile.Direction.South:
+            {
+                return tileGrid[homeTile.Index.Row + 1, homeTile.Index.Col    ];
+            }
+            case Tile.Direction.West:
+            {
+                return tileGrid[homeTile.Index.Row    , homeTile.Index.Col - 1];
+            }
+        }
+    }
 }

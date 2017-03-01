@@ -21,7 +21,8 @@ public class Tile : MonoBehaviour
 
     public GameObject mFloor { get; private set; }
 
-    public Direction [] Exits { get; private set; }
+    public Direction [] ExitDirections { get; private set; }  // Directions that have exits on this tile only - May contain null values! (For valid exits use ExitTiles)
+    public Tile [] ExitTiles  { get; private set; }  // Neighbouring tiles where both tiles share a matching exit.
 
     private bool IsSpawnTile = false;
     private bool IsDecontamTile = false;
@@ -52,7 +53,7 @@ public class Tile : MonoBehaviour
 
         waitForFixedUpdate = new WaitForFixedUpdate();
 
-        Exits = new Direction[4];
+        ExitDirections = new Direction[4];
         LoadDoorsAndExits();
     }
 
@@ -74,6 +75,8 @@ public class Tile : MonoBehaviour
         {
             mRenderer.material = slideableMaterial;
         }
+
+        UpdateExitTiles();
 
         return this;
     }
@@ -244,6 +247,9 @@ public class Tile : MonoBehaviour
         // Fix any transform drift
         FixDrift();
 
+        // Update the list of valid exits for the AI check
+        UpdateExitTiles();
+
         // Set slideable colour for new edge tiles (
         if (Index.Row == 0)
         {
@@ -357,6 +363,9 @@ public class Tile : MonoBehaviour
         // Fix any transform drift
         FixDrift();
 
+        // Update the list of valid exits for the AI check
+        UpdateExitTiles();
+
         areSliding = false;  // Re-enable other movements
     }
 
@@ -404,25 +413,25 @@ public class Tile : MonoBehaviour
         if (checkDoor != null)
         {
             doors[(int) Direction.North] = checkDoor.gameObject;
-            Exits[(int) Direction.North] = Direction.North;
+            ExitDirections[(int) Direction.North] = Direction.North;
         }
         checkDoor = transform.FindChild("Door_E");
         if (checkDoor != null)
         {
             doors[(int) Direction.East] = checkDoor.gameObject;
-            Exits[(int) Direction.East] = Direction.East;
+            ExitDirections[(int) Direction.East] = Direction.East;
         }
         checkDoor = transform.FindChild("Door_S");
         if (checkDoor != null)
         {
             doors[(int) Direction.South] = checkDoor.gameObject;
-            Exits[(int) Direction.South] = Direction.South;
+            ExitDirections[(int) Direction.South] = Direction.South;
         }
         checkDoor = transform.FindChild("Door_W");
         if (checkDoor != null)
         {
             doors[(int) Direction.West] = checkDoor.gameObject;
-            Exits[(int) Direction.West] = Direction.West;
+            ExitDirections[(int) Direction.West] = Direction.West;
         }
 
         ToggleAllDoors(false);  // Turn off all doors at the start
@@ -474,5 +483,68 @@ public class Tile : MonoBehaviour
         ToggleDoor(direction, true);
         yield return waitForSlideTime;
         ToggleDoor(direction, false);
+    }
+
+    private void UpdateExitTiles()
+    {
+        int numberOfExitTiles = 0;
+        Tile[] temp = new Tile[4];
+        foreach (Direction exit in ExitDirections)
+        {
+            if (exit != null)
+            {
+                switch (exit)
+                {
+                    case Direction.North:
+                    {
+                        Tile neighbour = Map.Get.TileNeighbour(this, Direction.North);
+                        if (neighbour.ExitDirections[(int) Direction.South] != null)
+                        {
+                            temp[numberOfExitTiles] = neighbour;
+                            numberOfExitTiles++;
+                        }
+                        break;
+                    }
+                    case Direction.East:
+                    {
+                        Tile neighbour = Map.Get.TileNeighbour(this, Direction.East);
+                        if (neighbour.ExitDirections[(int) Direction.West] != null)
+                        {
+                            temp[numberOfExitTiles] = neighbour;
+                            numberOfExitTiles++;
+                        }
+                        break;
+                    }
+                    case Direction.South:
+                    {
+                        Tile neighbour = Map.Get.TileNeighbour(this, Direction.South);
+                        if (neighbour.ExitDirections[(int) Direction.North] != null)
+                        {
+                            temp[numberOfExitTiles] = neighbour;
+                            numberOfExitTiles++;
+                        }
+                        break;
+                    }
+                    case Direction.West:
+                    {
+                        Tile neighbour = Map.Get.TileNeighbour(this, Direction.West);
+                        if (neighbour.ExitDirections[(int) Direction.East] != null)
+                        {
+                            temp[numberOfExitTiles] = neighbour;
+                            numberOfExitTiles++;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        Tile[] exitTiles = new Tile[numberOfExitTiles];
+        for (int i = 0; i < numberOfExitTiles; i++)
+        {
+            exitTiles[i] = temp[i];
+        }
+
+        ExitTiles = exitTiles;
     }
 }
