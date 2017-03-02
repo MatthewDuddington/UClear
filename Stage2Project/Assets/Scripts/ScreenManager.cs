@@ -56,6 +56,10 @@ public class ScreenManager : MonoBehaviour
             OnNewGame();
         }
 
+        RadiationBar.fillAmount = 0;
+        DecontamBar.fillAmount = 0;
+        DecontamMarks.fillAmount = 1;
+
         TransitionTo(Screens.GameScreen);
     }
 
@@ -79,15 +83,26 @@ public class ScreenManager : MonoBehaviour
     public void FillRadiationMeter(float amount)
     {
         RadiationBar.fillAmount += amount;
+        if (RadiationBar.fillAmount >= 1)
+        {
+            print("You lose");
+            EndGame();
+        }
     }
 
     public void FillDecontamMeter()
     {
         DecontamBar.fillAmount += 1 / GameManager.Get.numberOfResearchersToWin;
         DecontamMarks.fillAmount = 1 / DecontamBar.fillAmount;
+
+        if (RadiationBar.fillAmount >= 1)
+        {
+            print("You win");
+            EndGame();
+        }
     }
 
-    private void GameManager_OnRadiationDamage(int radiationAmount)
+    private void GameManager_OnRadiationDamage(float radiationAmount)
     {
         FillRadiationMeter(radiationAmount);
     }

@@ -114,7 +114,7 @@ GameObject:
   - component: {fileID: 65158525599593892}
   - component: {fileID: 23099683790896038}
   m_Layer: 0
-  m_Name: Door_W
+  m_Name: Door_E
   m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -585,3 +585,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43914386682cc4a65aef17cb32467e59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  exitDirectionsVisible: 
+  exitTilesVisible: []

@@ -208,6 +208,9 @@ public class Map : MonoBehaviour
             float horizontalPos = (Tile.Size * -MapSizeHorizontal * 0.5f) + (Tile.Size * 0.5f);
             float verticalPos = (Tile.Size * MapSizeVertical * 0.5f) - (Tile.Size * 0.5f);
             tile.transform.Translate(new Vector3(horizontalPos, 0, verticalPos));
+
+            // Setup initial exit relations
+            tile.UpdateExitTiles();
         }
 
         // Scale the map TODO Avoid hardcoded value here
@@ -355,6 +358,12 @@ public class Map : MonoBehaviour
         {
             tiles[i].Slide(direction);
             tileGrid[tiles[i].Index.Row, tiles[i].Index.Col] = tiles[i];
+        }
+
+        // Update tile exit paths records
+        foreach (Tile tile in tileGrid)
+        {
+            tile.UpdateExitTiles();
         }
     }
 

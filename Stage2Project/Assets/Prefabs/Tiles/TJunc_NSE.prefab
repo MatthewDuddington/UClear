@@ -114,7 +114,7 @@ GameObject:
   - component: {fileID: 65828444240089922}
   - component: {fileID: 23174598623010862}
   m_Layer: 0
-  m_Name: Door_E
+  m_Name: Door_N
   m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 65467542521391022}
   - component: {fileID: 23838424553438702}
   m_Layer: 0
-  m_Name: Door_W
+  m_Name: Door_E
   m_TagString: Wall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -183,8 +183,8 @@ Transform:
   - {fileID: 4420530933431772}
   - {fileID: 4796953179392796}
   - {fileID: 4414602338294736}
-  - {fileID: 4438923332153606}
   - {fileID: 4412951064269050}
+  - {fileID: 4438923332153606}
   - {fileID: 4190937853922624}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -200,7 +200,7 @@ Transform:
   m_LocalScale: {x: 0.25, y: 1, z: 4}
   m_Children: []
   m_Father: {fileID: 4379736687369702}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!4 &4414602338294736
 Transform:
@@ -239,7 +239,7 @@ Transform:
   m_LocalScale: {x: 0.25, y: 1, z: 4}
   m_Children: []
   m_Father: {fileID: 4379736687369702}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!4 &4703849994141888
 Transform:
@@ -667,3 +667,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43914386682cc4a65aef17cb32467e59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  exitDirectionsVisible: 
+  exitTilesVisible: []

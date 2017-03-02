@@ -20,6 +20,8 @@ public class Agent : MonoBehaviour
     static private WaitForSeconds waitForExplosionCountDownTime = new WaitForSeconds(3f);  // How long to wait before exploding
     static private WaitForSeconds waitForLeaderTrailTick = new WaitForSeconds(1f);  // How long to wait between logging new leader trail positions
 
+    static private WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();
+
     static private GameObject agentPrefab;  // Remove once randomised function written
 
     public RaycastHit [] hits { get; private set; }  // A record of the most recent objects hit by the decision check
@@ -40,6 +42,9 @@ public class Agent : MonoBehaviour
     private Vector3 [] trail;
     public Tile currentTile;  // TODO change to private
     public Tile targetTile;  // TODO Change to private
+    public Tile previousTile;  // TODO Change to private
+    private float resetTargetChoiceTime = 4f;  // How long to wait before selecting a new destination tile
+    private float resetTargetChoiceTimer;
 
     private Rigidbody mBody;
 
@@ -50,6 +55,7 @@ public class Agent : MonoBehaviour
     private bool shouldExpload;  // 
 
     public Vector3 VVelocity; // TODO remove temporary for visualising velocity
+    public Vector3 VSeekForce;
 
     // TODO Load in different agent bodyparts and return a randomised character
     static public GameObject GenerateRandomAgentDesign()
@@ -110,7 +116,7 @@ public class Agent : MonoBehaviour
         }
 
         currentTile = Map.Get.AgentSpawnTile;
-        targetTile = Map.Get.AgentSpawnTile;
+        targetTile = currentTile;
 
         // Place agent on spawn point
         mBody.MovePosition(Map.Get.AgentSpawnLocation);
@@ -153,6 +159,7 @@ public class Agent : MonoBehaviour
                         isLeader = true;
                         leaderToFollow = null;
                         StartCoroutine(Co_LeaderTrailTick());
+                        StartCoroutine(Co_ResetTargetChoiceTimer());
                     }
                 }
             }
@@ -179,15 +186,20 @@ public class Agent : MonoBehaviour
                     {
                         // Only going backwards is available so go back to previous tile
                         targetTile = currentTile.ExitTiles[0];
+                        previousTile = currentTile;
+                        resetTargetChoiceTimer = Time.fixedTime + resetTargetChoiceTime;
                     }
                     else if (numberOfAvailableExits == 2)
                     {
                         // Only one new tile is available so choose that one
                         for (int i = 0; i < numberOfAvailableExits; i++)
                         {
-                            if (currentTile.ExitTiles[i] != currentTile)
+                            if (currentTile.ExitTiles[i] != previousTile)
                             {
                                 targetTile = currentTile.ExitTiles[i];
+                                previousTile = currentTile;
+                                resetTargetChoiceTimer = Time.fixedTime + resetTargetChoiceTime;
+                                break;
                             }
                         }
                     }
@@ -198,8 +210,10 @@ public class Agent : MonoBehaviour
                         do
                         {
                             randomExitIndex = Random.Range(0, numberOfAvailableExits);
-                        } while (currentTile.ExitTiles[randomExitIndex] == currentTile);
+                        } while (currentTile.ExitTiles[randomExitIndex] == previousTile);
                         targetTile = currentTile.ExitTiles[randomExitIndex];
+                        previousTile = currentTile;
+                        resetTargetChoiceTimer = Time.fixedTime + resetTargetChoiceTime;
                     }
 
                     if ( shouldExpload
@@ -255,6 +269,7 @@ public class Agent : MonoBehaviour
 
             mBody.velocity = mBody.velocity + seekForce + (gravity * Time.fixedDeltaTime);
 
+            VSeekForce = seekForce;
             VVelocity = mBody.velocity;
 
 
@@ -296,6 +311,23 @@ public class Agent : MonoBehaviour
             trail[4] = transform.position;
 
             yield return waitForLeaderTrailTick;
+        }
+    }
+
+    // Target reset timeout for solving interuptions from wall collision or tiles being slid
+    private IEnumerator Co_ResetTargetChoiceTimer()
+    {
+        while (mState != BehaviourState.Disabled)
+        {
+            resetTargetChoiceTimer = Time.fixedTime + resetTargetChoiceTime;
+            while (Time.fixedTime < resetTargetChoiceTimer)
+            {
+                yield return waitForFixedUpdate;
+            }
+
+            // If timer runs out return to current tile and choose new destination
+            targetTile = currentTile;
+            yield return waitForFixedUpdate;
         }
     }
 

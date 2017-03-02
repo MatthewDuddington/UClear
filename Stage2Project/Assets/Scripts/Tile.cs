@@ -43,6 +43,12 @@ public class Tile : MonoBehaviour
 
     private GameObject [] doors;
 
+    public GridIndex VIndex; // TODO remove temp visualisation of index
+    void Update()
+    {
+        VIndex = Index;
+    }
+
     void Awake()
     {
         mRenderer = transform.FindChild("Floor").gameObject.GetComponent<MeshRenderer>();   
@@ -78,7 +84,6 @@ public class Tile : MonoBehaviour
         }
 
         LoadDoorsAndExits();
-        UpdateExitTiles();
 
         return this;
     }
@@ -143,10 +148,16 @@ public class Tile : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if ( IsDecontamTile
-          && other.gameObject.CompareTag("Agent"))
+        if (other.gameObject.CompareTag("Agent"))
         {
-            other.gameObject.GetComponent<Agent>().Decontaminate();
+            if (IsDecontamTile)
+            {
+                other.gameObject.GetComponent<Agent>().Decontaminate();
+            }
+            else
+            {
+                other.GetComponent<Agent>().ArriveAtTile(this);
+            }
         }
     }
 
@@ -246,11 +257,7 @@ public class Tile : MonoBehaviour
             yield return waitForFixedUpdate;
         }
 
-        // Fix any transform drift
-        FixDrift();
-
-        // Update the list of valid exits for the AI check
-        UpdateExitTiles();
+        FixDrift();  // Fix any transform drift
 
         // Set slideable colour for new edge tiles (
         if (Index.Row == 0)
@@ -362,11 +369,7 @@ public class Tile : MonoBehaviour
 
         ToggleAllDoors(false);  // Reopen doors after landing
 
-        // Fix any transform drift
-        FixDrift();
-
-        // Update the list of valid exits for the AI check
-        UpdateExitTiles();
+        FixDrift();  // Fix any transform drift
 
         areSliding = false;  // Re-enable other movements
     }
@@ -488,7 +491,7 @@ public class Tile : MonoBehaviour
         ToggleDoor(direction, false);
     }
 
-    private void UpdateExitTiles()
+    public void UpdateExitTiles()
     {
         int numberOfExitTiles = 0;
         Tile[] temp = new Tile[4];

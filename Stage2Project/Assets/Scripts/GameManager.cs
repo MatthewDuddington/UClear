@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public delegate void GameEvent(int value);
+    public delegate void GameEvent(float value);
     public static event GameEvent OnRadiationDamage;
 
     // Easy accessor for the class instance
@@ -101,6 +101,7 @@ public class GameManager : MonoBehaviour
         mState = State.Playing;
         mPlayer.gameObject.SetActive(true);
         StartCoroutine(Co_SpawnAgents());
+        StartCoroutine(Co_RadiationTick());
     }
 
     private void PauseGame()
@@ -161,7 +162,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void RadiationDamage(int radiationAmount)
+    public void RadiationDamage(float radiationAmount)
     {
         if (OnRadiationDamage != null)
         {
@@ -169,12 +170,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private IEnumerator RadiationTick()
+    private IEnumerator Co_RadiationTick()
     {
         while (mState == State.Playing)
         {
             yield return waitForRadiationTick;
-            RadiationDamage(1);
+            RadiationDamage(0.005f);
         }
     }
 }

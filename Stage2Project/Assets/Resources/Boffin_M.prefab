@@ -849,6 +849,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 841787886e79f4bd7b0735ab910c05eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  leaderToFollow: {fileID: 0}
+  currentTile: {fileID: 0}
+  targetTile: {fileID: 0}
+  Speed: 12.1
+  VVelocity: {x: 0, y: 0, z: 0}
+  VSeekForce: {x: 0, y: 0, z: 0}
 --- !u!114 &114824217848520630
 MonoBehaviour:
   m_ObjectHideFlags: 1
