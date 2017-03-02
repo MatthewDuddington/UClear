@@ -311,6 +311,11 @@ Prefab:
       propertyPath: Arena
       value: 
       objectReference: {fileID: 1877346107}
+    - target: {fileID: 82609042280133752, guid: 8fd6a828df12f40879ddaba259242c57,
+        type: 2}
+      propertyPath: m_Volume
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8fd6a828df12f40879ddaba259242c57, type: 2}
   m_IsPrefabParent: 0

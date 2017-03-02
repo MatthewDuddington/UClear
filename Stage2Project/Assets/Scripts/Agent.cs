@@ -25,6 +25,9 @@ public class Agent : MonoBehaviour
 
     public RaycastHit [] hits { get; private set; }  // A record of the most recent objects hit by the decision check
 
+    // Flock, Wander, Avoid and Hunt no longer used in this version as behaviour was not as desired yet
+    // Needed to ship a functioning AI for the game to be playable, so an alternative to my original approach has been used for now
+    // Sorry that this bypasses some of the most interesting starter code! But the overall game idea was still inspired by it
     public Vector3 FlockForce       { get; set; }
     public Vector3 WanderForce      { get; set; }
     public Vector3 AvoidWallsForce  { get; set; }
@@ -42,6 +45,7 @@ public class Agent : MonoBehaviour
     public Tile currentTile;  // TODO change to private
     public Tile targetTile;  // TODO Change to private
     public Tile previousTile;  // TODO Change to private
+    private bool priorityTarget = false;
     private float resetTargetChoiceTime = 4f;  // How long to wait before selecting a new destination tile
     private float resetTargetChoiceTimer;
 
@@ -50,6 +54,7 @@ public class Agent : MonoBehaviour
     private Vector3 gravity;  // Keep a constant value for gravity to avoid recalculating each time
     [SerializeField]
     private float Speed;
+    private float originalSpeed = 0;
 
     private bool shouldExpload;  // 
 
@@ -85,6 +90,11 @@ public class Agent : MonoBehaviour
         hits = new RaycastHit[16];
 
         trail = new Vector3[5];
+
+        if (originalSpeed == 0)  // Avoid overriding with faster speed while agents are still spawning
+        {
+            originalSpeed = Speed;
+        }
 
         mHunt = GetComponent<HuntPlayer>();
         mFlock = GetComponent<FlockWithGroup>();
@@ -157,6 +167,14 @@ public class Agent : MonoBehaviour
         }
     }
 
+    void OnCollisionEnter(Collision col)
+    {
+        if (col.gameObject.CompareTag("Player"))
+        {
+            Expload();
+        }
+    }
+
     public void Decontaminate()
     {
         // Playsound
@@ -195,7 +213,7 @@ public class Agent : MonoBehaviour
             }
             else
             {
-                bool priorityTarget = false;
+                priorityTarget = false;
 
                 // Can I see the player
                 if (IsTargetVisible(Player.Get.gameObject))
@@ -341,12 +359,26 @@ public class Agent : MonoBehaviour
     {
         if (mState != BehaviourState.Disabled)
         {
-            Vector3 targetPos;
+            Speed = originalSpeed;
+
+            Vector3 targetPos = Vector3.zero;
             if (!isLeader)
             {
                 // Follow the leader
                 targetPos = leaderToFollow.WhereShouldIGo(transform.position);
                 // Move in direction of target
+            }
+            else if (priorityTarget)
+            {
+                Speed = originalSpeed * 1.03f;
+                if (targetTile.myTileType == Tile.TileType.Escape)
+                {
+                    targetPos = targetTile.transform.position;
+                }
+                else
+                {
+                    targetPos = GameManager.Get.mPlayer.transform.position;
+                }
             }
             else
             {
@@ -476,10 +508,31 @@ public class Agent : MonoBehaviour
     {
         shouldExpload = true;
 
-        // TODO Warn player about to expload
-        // TODO Playsound "Oh no!"
-        print("OH NO!!!");
         transform.localScale = Vector3.one * 3;
+
+        switch (Random.Range(0,4))
+        {
+            case 0:
+            {
+                GameManager.Get.audio.PlayOneShot(GameManager.OhNo1);
+                break;
+            }
+            case 1:
+            {
+                GameManager.Get.audio.PlayOneShot(GameManager.OhNo2);
+                break;
+            }
+            case 2:
+            {
+                GameManager.Get.audio.PlayOneShot(GameManager.OhNo3);
+                break;
+            }
+            case 3:
+            {
+                GameManager.Get.audio.PlayOneShot(GameManager.OhNo4);
+                break;
+            }
+        }
 
         yield return waitForExplosionCountDownTime;
         if (shouldExpload)
@@ -494,7 +547,7 @@ public class Agent : MonoBehaviour
 
     private void Expload()
     {
-        // TODO Playsound "Pop!"
+        GameManager.Get.audio.PlayOneShot(GameManager.PopSplat);
         GameManager.Get.RadiationDamage(GameManager.Get.RadiationDamageFromAgents);
         Reset();
     }

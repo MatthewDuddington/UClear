@@ -313,6 +313,8 @@ public class Map : MonoBehaviour
     {
         Tile[] tiles;
         Tile.Direction direction;
+
+        GameManager.Get.audio.PlayOneShot(GameManager.Slide);
         
         // Add in reverse order, references to the tiles to be moved. Also call for safety doors to raise.
         if (initiatingTileIndex.Row == 0)  // Top edge

@@ -18,6 +18,11 @@ public class ScreenManager : MonoBehaviour
     private Image DecontamMarks;
     private Image DecontamBar;
 
+    private bool hasWon;
+
+    public Text Win;
+    public Text Lose;
+
     void Awake()
     {
         mScreens = new Canvas[(int)Screens.NumScreens];
@@ -45,7 +50,7 @@ public class ScreenManager : MonoBehaviour
         RadiationBar  = GameObject.Find("RadiationBar").GetComponent<Image>();
         DecontamBar   = GameObject.Find("DecontamBar").GetComponent<Image>();
         DecontamMarks = GameObject.Find("DecontamMarks").GetComponent<Image>();
-
+        
         mCurrentScreen = Screens.TitleScreen;
     }
 
@@ -75,6 +80,17 @@ public class ScreenManager : MonoBehaviour
             OnExitGame();
         }
 
+        if (hasWon)
+        {
+            Win.enabled = true;
+            Lose.enabled = false;
+        }
+        else
+        {
+            Win.enabled = false;
+            Lose.enabled = true;
+        }
+
         TransitionTo(Screens.ResultScreen);
     }
 
@@ -91,6 +107,7 @@ public class ScreenManager : MonoBehaviour
         if (RadiationBar.fillAmount >= 1)
         {
             print("You lose");
+            hasWon = false;
             EndGame();
         }
     }
@@ -103,6 +120,7 @@ public class ScreenManager : MonoBehaviour
         if (DecontamBar.fillAmount >= 1)
         {
             print("You win");
+            hasWon = true;
             EndGame();
         }
     }

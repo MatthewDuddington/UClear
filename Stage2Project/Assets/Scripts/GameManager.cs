@@ -23,6 +23,15 @@ public class GameManager : MonoBehaviour
     } 
 
     public enum State { Paused, Playing, GameOver }
+    
+    // TODO Consider moving sound items to a Sound Manager
+    public AudioSource audio         { get; private set; }
+    public static AudioClip Slide    { get; private set; }
+    public static AudioClip PopSplat { get; private set; }
+    public static AudioClip OhNo1    { get; private set; }
+    public static AudioClip OhNo2    { get; private set; }
+    public static AudioClip OhNo3    { get; private set; }
+    public static AudioClip OhNo4    { get; private set; }
 
     public float gravity { get { return 9.8f; } }
 
@@ -48,15 +57,13 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int  NumberOfAgentsToSpawn = 15;                          // 15
     public int   NumberOfDecontamToWin     { get { return 10; } }     // 10
-    public float AmbiantRadiationDamage    { get { return 0.05f; } }  // 0.05f
+    public float AmbiantRadiationDamage    { get { return 0.01f; } }  // 0.05f Hard 0.01f Moderate
     public float RadiationDamageFromAgents { get { return 0.1f; } }   // 0.1f
 
     public Agent [] mAgents { get; private set; }  // Changed mObjects <List> to mAgents [Array] to reflect its use in this game and known size
     public State GameState  { get; private set; }  // Changed private mState to public GameState to enable ticking objects to check for pauseing
 
-    private Player mPlayer;
-
-
+    public Player mPlayer { get; private set; }
 
     void Awake()
     {
@@ -72,6 +79,14 @@ public class GameManager : MonoBehaviour
 
         waitForTimeBetweenSpawns = new WaitForSeconds(TimeBetweenSpawns);
         waitForRadiationTick = new WaitForSeconds(RadiationTickTime);
+
+        audio = GetComponent<AudioSource>();
+        Slide = Resources.Load<AudioClip>("ClankSlideThud");
+        PopSplat = Resources.Load<AudioClip>("PopSplat");
+        OhNo1 = Resources.Load<AudioClip>("OhNo1");
+        OhNo2 = Resources.Load<AudioClip>("OhNo2");
+        OhNo3 = Resources.Load<AudioClip>("OhNo3");
+        OhNo4 = Resources.Load<AudioClip>("OhNo4");
     }
 
     void Start()
@@ -80,9 +95,6 @@ public class GameManager : MonoBehaviour
         PreLoadAgents();
         mPlayer.gameObject.SetActive(false);
         GameState = State.Paused;
-//        mPlayer.gameObject.SetActive(true);
-//        mState = State.Playing;
-//        StartCoroutine(Co_SpawnAgents());
     }
 
     private void BeginNewGame()
