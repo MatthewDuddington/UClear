@@ -15,19 +15,20 @@ public class Tile : MonoBehaviour
     private static float slideTime = 1.5f;  // Time for tiles to take when moving during a slide
     private static bool areSliding = false;
 
-    public GridIndex Index { get; private set; }
-    public bool IsMovable  { get; private set; }
-    public bool IsEdgeTile { get; private set; }
+    public GridIndex Index     { get; private set; }
+    public bool IsMovable      { get; private set; }
+    public bool IsEdgeTile     { get; private set; }
+
+    public enum TileType { Normal, Decontam, Spawn, Escape }
+    public TileType myTileType;
 
     public GameObject mFloor { get; private set; }
 
     public bool [] ExitDirections { get; private set; }  // Directions that have exits on this tile only (For valid exits use ExitTiles)
     public Tile [] ExitTiles  { get; private set; }  // Neighbouring tiles where both tiles share a matching exit.
-    public bool[] exitDirectionsVisible;
+    public bool [] exitDirectionsVisible;
     public Tile [] exitTilesVisible;
 
-    private bool IsSpawnTile = false;
-    private bool IsDecontamTile = false;
 
     private MeshRenderer mRenderer;
     private static Material mainMaterial;
@@ -51,7 +52,6 @@ public class Tile : MonoBehaviour
 
     void Awake()
     {
-        mRenderer = transform.FindChild("Floor").gameObject.GetComponent<MeshRenderer>();   
         mainMaterial = Resources.Load<Material>("TileMainMaterial");
         slideableMaterial = Resources.Load<Material>("TileSlideableMaterial");
         hoverMaterial = Resources.Load<Material>("TileHoverMaterial");
@@ -64,13 +64,18 @@ public class Tile : MonoBehaviour
         ExitDirections = new bool[4] { false, false, false, false };
     }
 
+    // Initialisation for tiles inside map grid
     public Tile Init (int row, int col, bool isMovable, bool isEdgeTile)
     {
-        transform.position = new Vector3 (Size * col, 0, Size * -row);
+        transform.position = (new Vector3 (Size * col, 0, Size * -row));
         Index = Index.SetRow(row);
         Index = Index.SetCol(col);
         IsMovable = isMovable;
         IsEdgeTile = isEdgeTile;
+
+        myTileType = TileType.Normal;
+
+        mRenderer = transform.FindChild("Floor").gameObject.GetComponent<MeshRenderer>();
 
         if (!IsMovable)
         {
@@ -88,10 +93,21 @@ public class Tile : MonoBehaviour
         return this;
     }
 
+    // Initialisation for escape tiles
+    public Tile Init (int row, int col)
+    {
+        transform.position = (new Vector3 (Size * col, 0, Size * -row));
+        Index = Index.SetRow(row);
+        Index = Index.SetCol(col);
+        myTileType = TileType.Escape;
+
+        return this;
+    }
+
     // Simple hover indication for now
     void OnMouseEnter()
     {
-        if(GameManager.Get.mState == GameManager.State.Playing)
+        if(GameManager.Get.GameState == GameManager.State.Playing)
         {
             if ( IsEdgeTile
               && IsMovable)
@@ -103,7 +119,7 @@ public class Tile : MonoBehaviour
 
     void OnMouseExit()
     {
-        if(GameManager.Get.mState == GameManager.State.Playing)
+        if(GameManager.Get.GameState == GameManager.State.Playing)
         {
             if ( IsEdgeTile
               && IsMovable)
@@ -113,8 +129,7 @@ public class Tile : MonoBehaviour
                     mRenderer.material = slideableMaterial;
                 }
             }
-            else if ( !IsSpawnTile
-                   && !IsDecontamTile)
+            else if (myTileType == TileType.Normal)
             { 
                 mRenderer.material = mainMaterial;
             }
@@ -146,21 +161,6 @@ public class Tile : MonoBehaviour
         }
     }
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.CompareTag("Agent"))
-        {
-            if (IsDecontamTile)
-            {
-                other.gameObject.GetComponent<Agent>().Decontaminate();
-            }
-            else
-            {
-                other.GetComponent<Agent>().ArriveAtTile(this);
-            }
-        }
-    }
-
     // Set visual and reference for Spawn tile
     public void SetAsSpawnLocation()
     {
@@ -170,7 +170,8 @@ public class Tile : MonoBehaviour
         {
             transform.GetChild(i).GetComponent<Renderer>().material = radiationWallMaterial;
         }
-        IsSpawnTile = true;
+//        IsSpawnTile = true;
+        myTileType = TileType.Spawn;
     }
 
     // Set visual and reference for Decontamination tile
@@ -182,7 +183,8 @@ public class Tile : MonoBehaviour
         {
             transform.GetChild(i).GetComponent<Renderer>().material = decontamLocationWallMaterial;
         }
-        IsDecontamTile = true;
+//        IsDecontamTile = true;
+        myTileType = TileType.Decontam;
     }
     
     //----------------------------------------------------------------------------//
@@ -346,6 +348,13 @@ public class Tile : MonoBehaviour
             float t = (Time.fixedTime - startTime) / slideTime;
             liftPart = Vector3.up * ((LiftDistance * GameManager.Get.liftCurve.Evaluate(t)) - transform.position.y);
             mBody.MovePosition((transform.position + ((directionPart / slideTime) * Time.fixedDeltaTime)) + liftPart);
+
+            // Check for pausing
+            while (GameManager.Get.GameState == GameManager.State.Paused)
+            {
+                
+            }
+
             yield return waitForFixedUpdate;
         }
         /*/

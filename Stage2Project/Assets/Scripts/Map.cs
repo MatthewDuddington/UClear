@@ -50,56 +50,41 @@ public class Map : MonoBehaviour
         private set { This = value; }
     } 
 
-    public enum TileType
-    {
-        Corner_SE,
-        Corner_SW,
-        Corner_NE,
-        Corner_NW,
-        TJunc_SEW,
-        TJunc_NSW,
-        TJunc_NEW,
-        TJunc_NSE,
-        FourWay,
-        Straight_NS,
-        Straight_EW
-    }
-
     [SerializeField]
-    private int mapSizeHorizontal;
-    public int MapSizeHorizontal { get { return mapSizeHorizontal; } }
+    private int mapSizeHorizontal;  // 13
+    public int MapSizeHorizontal { get; private set; }
     [SerializeField]
-    private int mapSizeVertical;
-    public int MapSizeVertical   { get { return mapSizeVertical; } }
+    private int mapSizeVertical;    // 7
+    public int MapSizeVertical   { get; private set; }
 
     [SerializeField]
     private Tile [] TilePrefabs;
+    //        Corner_SE,
+    //        Corner_SW,
+    //        Corner_NE,
+    //        Corner_NW,
+    //        TJunc_SEW,
+    //        TJunc_NSW,
+    //        TJunc_NEW,
+    //        TJunc_NSE,
+    //        FourWay,
+    //        Straight_NS,
+    //        Straight_EW,
+    //        EscapeTile
 
-    // A grid of Z rows * X cols map tiles
-    private Tile [,] tileGrid;
+    private Tile [,] tileGrid;  // A grid of Z rows * X cols map tiles
 
     public Vector3 AgentSpawnLocation { get; private set; }
     public Tile AgentSpawnTile { get; private set; }
+
+    public Tile [] EscapeTiles;
 
     void Awake()
     {
         // Set easy accessor for the class
         Get = this;
-
-        // Check for map size having non-odd proportions and adjust if needed
-        if ((mapSizeHorizontal) % 2 == 0)
-        {
-            Debug.LogWarning("Map Size horizontal proportion is non-odd, adjusting to compensate");
-            mapSizeHorizontal ++;
-        }
-        if ((mapSizeVertical) % 2 == 0)
-        {
-            Debug.LogWarning("Map Size vertical proportion is non-odd, adjusting to compensate");
-            mapSizeVertical ++;
-        }
-
-        // Setup size of tile grid 2D array
-        tileGrid = new Tile[(int) MapSizeVertical, (int) MapSizeHorizontal];
+        tileGrid = new Tile[0,0];
+        EscapeTiles = new Tile[0];
     }
 
     public void GenerateNewMap()
@@ -111,7 +96,16 @@ public class Map : MonoBehaviour
                 GameObject.DestroyImmediate(tile.gameObject);  // TODO Consider disabling and reusing tiles from a pool rather than destroying and reinstantiating each time.
             }
         }
+        foreach (Tile tile in EscapeTiles)
+        {
+            if (tile != null)
+            {
+                GameObject.DestroyImmediate(tile.gameObject);
+            }
+        }
 
+        CheckMapSize();
+        
         // Reset scale fix of the map. TODO Avoid having to do this
         transform.localScale = Vector3.one;
 
@@ -119,6 +113,27 @@ public class Map : MonoBehaviour
         RandomiseMoveableTiles();
         PositionMap();
         RandomiseGameLocations();
+    }
+    
+    private void CheckMapSize()
+    {
+        // Check for map size having non-odd proportions and adjust if needed
+        if ((mapSizeHorizontal) % 2 == 0)
+        {
+            Debug.LogWarning("Map Size horizontal proportion is non-odd, adjusting to compensate");
+            mapSizeHorizontal ++;
+        }
+        if ((mapSizeVertical) % 2 == 0)
+        {
+            Debug.LogWarning("Map Size vertical proportion is non-odd, adjusting to compensate");
+            mapSizeVertical ++;
+        }
+        
+        MapSizeHorizontal = mapSizeHorizontal;
+        MapSizeVertical = mapSizeVertical;
+
+        // Setup size of tile grid 2D array
+        tileGrid = new Tile[(int) MapSizeVertical, (int) MapSizeHorizontal];
     }
 
     // Add the fixed corner, edge and central tiles
@@ -156,6 +171,30 @@ public class Map : MonoBehaviour
                 tileGrid[row, col] = Instantiate (TilePrefabs[randomTJunt]).Init(row, col, false, false);
             }
         }
+
+        // Escape tiles
+        // TODO Add escape tiles
+        EscapeTiles = new Tile[MapSizeHorizontal + MapSizeVertical - 2];
+        for (int i = 1; i < MapSizeHorizontal; i += 2)  // North side
+        {
+            int index = (int) ((i - 1) * 0.5f);
+            EscapeTiles[index] = Instantiate (TilePrefabs[11]).Init(-1, i);
+        }
+        for (int i = 1; i < MapSizeVertical; i += 2)  // East side
+        {
+            int index = (int) (((MapSizeHorizontal - 1) * 0.5f) + ((i - 1) * 0.5f));
+            EscapeTiles[index] = Instantiate (TilePrefabs[11]).Init(i, MapSizeHorizontal);
+        }
+        for (int i = 1; i < MapSizeHorizontal; i += 2)  // South side
+        {
+            int index = (int) (((MapSizeHorizontal - 1) * 0.5f) + ((MapSizeVertical - 1) * 0.5f) + ((i - 1) * 0.5f));
+            EscapeTiles[index] = Instantiate (TilePrefabs[11]).Init(MapSizeVertical, i);
+        }
+        for (int i = 1; i < MapSizeVertical; i += 2)  // South side
+        {
+            int index = (int) ((MapSizeHorizontal - 1) + ((MapSizeVertical - 1) * 0.5f) + ((i - 1) * 0.5f));
+            EscapeTiles[index] = Instantiate (TilePrefabs[11]).Init(i, -1);
+        }
     }
 
     // Populate the remaining tile spaces with a random choice of tiles
@@ -167,7 +206,7 @@ public class Map : MonoBehaviour
             {
                 if (tileGrid[row, col] == null)
                 {
-                    int randomTile = Random.Range(0, TilePrefabs.Length);
+                    int randomTile = Random.Range(0, TilePrefabs.Length - 1);  // -1 to exclude the escape tile
                     if (row == 0)  // N
                     {
                         tileGrid[row, col] = Instantiate (TilePrefabs[randomTile]).Init(row, col, true, true);
@@ -211,6 +250,16 @@ public class Map : MonoBehaviour
 
             // Setup initial exit relations
             tile.UpdateExitTiles();
+        }
+
+        // Do the same for the escape tiles
+        foreach (Tile tile in EscapeTiles)
+        {
+            tile.transform.parent = this.transform;
+
+            float horizontalPos = (Tile.Size * -MapSizeHorizontal * 0.5f) + (Tile.Size * 0.5f);
+            float verticalPos = (Tile.Size * MapSizeVertical * 0.5f) - (Tile.Size * 0.5f);
+            tile.transform.Translate(new Vector3(horizontalPos, 0, verticalPos));
         }
 
         // Scale the map TODO Avoid hardcoded value here

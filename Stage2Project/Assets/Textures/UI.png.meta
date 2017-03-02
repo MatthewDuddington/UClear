@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: a9f2c4b911c704f42ad0ed82cbe91376
-timeCreated: 1488298337
+timeCreated: 1488481212
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -13,6 +13,8 @@ TextureImporter:
     21300012: BarGreen
     21300014: BarRed
     21300016: BarMarks
+    21300018: PlayButton
+    21300020: InstructionsButton
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -206,6 +208,32 @@ TextureImporter:
         y: 773
         width: 469
         height: 41
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: PlayButton
+      rect:
+        serializedVersion: 2
+        x: 596
+        y: 548
+        width: 389
+        height: 215
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: InstructionsButton
+      rect:
+        serializedVersion: 2
+        x: 366
+        y: 359
+        width: 602
+        height: 180
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}

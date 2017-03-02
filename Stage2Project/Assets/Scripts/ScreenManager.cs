@@ -9,7 +9,7 @@ public class ScreenManager : MonoBehaviour
     public static event GameEvent OnNewGame;
     public static event GameEvent OnExitGame;
 
-    public enum Screens { TitleScreen, GameScreen, ResultScreen, NumScreens }
+    public enum Screens { TitleScreen, InstructionsScreen, GameScreen, ResultScreen, NumScreens }
     
     private Canvas [] mScreens;
     private Screens mCurrentScreen;
@@ -63,6 +63,11 @@ public class ScreenManager : MonoBehaviour
         TransitionTo(Screens.GameScreen);
     }
 
+    public void Instructions()
+    {
+        TransitionTo(Screens.InstructionsScreen);
+    }
+
     public void EndGame()
     {
         if (OnExitGame != null)
@@ -92,10 +97,10 @@ public class ScreenManager : MonoBehaviour
 
     public void FillDecontamMeter()
     {
-        DecontamBar.fillAmount += 1 / GameManager.Get.numberOfResearchersToWin;
-        DecontamMarks.fillAmount = 1 / DecontamBar.fillAmount;
+        DecontamBar.fillAmount += 0.1f;
+        DecontamMarks.fillAmount = 1 - DecontamBar.fillAmount;
 
-        if (RadiationBar.fillAmount >= 1)
+        if (DecontamBar.fillAmount >= 1)
         {
             print("You win");
             EndGame();
@@ -109,6 +114,7 @@ public class ScreenManager : MonoBehaviour
 
     private void Agent_OnDecontamination()
     {
+        print("decontamination");
         FillDecontamMeter();
     }
 }

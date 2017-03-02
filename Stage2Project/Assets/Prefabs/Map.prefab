@@ -65,3 +65,5 @@ MonoBehaviour:
   - {fileID: 114439695075884500, guid: 17f97380f5e0e479481474c22f4f7cd7, type: 2}
   - {fileID: 114519634218201230, guid: 810fc477e390a4b24a34f9574ee7f041, type: 2}
   - {fileID: 114872570877489272, guid: d979596ca135540ab9f8f39ce38471be, type: 2}
+  - {fileID: 114862803411675804, guid: f2c40b6fdf40a44e89c67bf5a3475781, type: 2}
+  EscapeTiles: []

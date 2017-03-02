@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
 
     public enum State { Paused, Playing, GameOver }
 
-    public float gravity = 9.8f;
+    public float gravity { get { return 9.8f; } }
 
     public AnimationCurve liftCurve;  // Curve to drive height of tiles when lifted off the map
 
@@ -38,26 +38,24 @@ public class GameManager : MonoBehaviour
     private Arena Arena;
 
     [SerializeField]
-    private float TimeBetweenSpawns;
+    private float TimeBetweenSpawns = 1;  // 1
     private WaitForSeconds waitForTimeBetweenSpawns;
 
     [SerializeField]
-    private float RadiationTickTime;
+    private float RadiationTickTime = 1;  // 1
     private WaitForSeconds waitForRadiationTick;
 
     [SerializeField]
-    private int numberOfAgentsToSpawn = 30;
+    private int  NumberOfAgentsToSpawn = 15;                          // 15
+    public int   NumberOfDecontamToWin     { get { return 10; } }     // 10
+    public float AmbiantRadiationDamage    { get { return 0.05f; } }  // 0.05f
+    public float RadiationDamageFromAgents { get { return 0.1f; } }   // 0.1f
 
-    public int numberOfResearchersToWin = 10;
-
-    public Agent [] mAgents { get; private set; }  // Changed mObjects List to mAgents Array to reflect its use in this game and known size
-    public State mState { get; private set; }
-
-    private int radiationLevel = 0;
+    public Agent [] mAgents { get; private set; }  // Changed mObjects <List> to mAgents [Array] to reflect its use in this game and known size
+    public State GameState  { get; private set; }  // Changed private mState to public GameState to enable ticking objects to check for pauseing
 
     private Player mPlayer;
 
-    private float mNextSpawn;
 
 
     void Awake()
@@ -70,7 +68,7 @@ public class GameManager : MonoBehaviour
         ScreenManager.OnNewGame += ScreenManager_OnNewGame;
         ScreenManager.OnExitGame += ScreenManager_OnExitGame;
 
-        mAgents = new Agent[numberOfAgentsToSpawn];
+        mAgents = new Agent[NumberOfAgentsToSpawn];
 
         waitForTimeBetweenSpawns = new WaitForSeconds(TimeBetweenSpawns);
         waitForRadiationTick = new WaitForSeconds(RadiationTickTime);
@@ -81,7 +79,7 @@ public class GameManager : MonoBehaviour
 //        Arena.Calculate();
         PreLoadAgents();
         mPlayer.gameObject.SetActive(false);
-        mState = State.Paused;
+        GameState = State.Paused;
 //        mPlayer.gameObject.SetActive(true);
 //        mState = State.Playing;
 //        StartCoroutine(Co_SpawnAgents());
@@ -97,8 +95,7 @@ public class GameManager : MonoBehaviour
         Map.Get.GenerateNewMap();
 
         mPlayer.transform.position = new Vector3(0.0f, 0.5f, 0.0f);
-        mNextSpawn = TimeBetweenSpawns;
-        mState = State.Playing;
+        GameState = State.Playing;
         mPlayer.gameObject.SetActive(true);
         StartCoroutine(Co_SpawnAgents());
         StartCoroutine(Co_RadiationTick());
@@ -106,13 +103,20 @@ public class GameManager : MonoBehaviour
 
     private void PauseGame()
     {
-        mState = State.Paused;
+        mPlayer.gameObject.SetActive(false);
+        GameState = State.Paused;
+    }
+
+    private void ResumeGame()
+    {
+        mPlayer.gameObject.SetActive(true);
+        GameState = State.Playing;
     }
 
     private void EndGame()
     {
         mPlayer.gameObject.SetActive(false);
-        mState = State.GameOver;
+        GameState = State.GameOver;
     }
 
     // When subscribed events are triggered in ScreenManager, Begin or End the game
@@ -129,7 +133,7 @@ public class GameManager : MonoBehaviour
     // Changed ticking random spawn in Update function to instead pre-load a list of random agents
     private void PreLoadAgents()
     {
-        for (int i = 0; i < numberOfAgentsToSpawn; i++)
+        for (int i = 0; i < NumberOfAgentsToSpawn; i++)
         {
             GameObject spawnAgent = Agent.GenerateRandomAgentDesign();
             GameObject spawnedInstance = Instantiate(spawnAgent, Vector3.down * 100, Quaternion.identity);
@@ -141,7 +145,7 @@ public class GameManager : MonoBehaviour
     
     private IEnumerator Co_SpawnAgents()
     {
-        while (mState == State.Playing && Agent.ActiveAgentsCount < numberOfAgentsToSpawn)
+        while (GameState == State.Playing && Agent.ActiveAgentsCount < NumberOfAgentsToSpawn)
         {
             // Check whether spawning an agent would cause it to overlap with an existing agent
             bool shouldSpawn = true;
@@ -172,7 +176,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator Co_RadiationTick()
     {
-        while (mState == State.Playing)
+        while (GameState == State.Playing)
         {
             yield return waitForRadiationTick;
             RadiationDamage(0.005f);

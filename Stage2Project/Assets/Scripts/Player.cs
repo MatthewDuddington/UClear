@@ -31,25 +31,37 @@ public class Player : MonoBehaviour
         mBody = GetComponent<Rigidbody>();
     }
 
+    void OnCollisionEnter(Collision col)
+    {
+        if (col.gameObject.CompareTag("Agent"))
+        {
+            GameManager.Get.RadiationDamage(GameManager.Get.RadiationDamageFromAgents);
+        }
+    }
+
     void FixedUpdate()  // Changed to FixedUpdate as influencing Rigidbody
     {
-        Vector3 direction = Vector3.zero;
-
-        // Changed input to reference Axis rather than hardcoded keys
-        if (Input.GetButton("Horizontal"))
+        if (GameManager.Get.GameState == GameManager.State.Playing)
         {
-            direction += Input.GetAxisRaw("Horizontal") * Vector3.right;
+            Vector3 direction = Vector3.zero;
+
+            // Changed input to reference Axis rather than hardcoded keys
+            if (Input.GetButton("Horizontal"))
+            {
+                direction += Input.GetAxisRaw("Horizontal") * Vector3.right;
+            }
+
+            if (Input.GetButton("Vertical"))
+            {
+                direction += Input.GetAxisRaw("Vertical") * Vector3.forward;
+            }
+
+            Vector3 gravity = Vector3.down * GameManager.Get.gravity * mBody.mass;
+
+            // Maintaining use of Rigidbody force rather than Translation
+            mBody.velocity = (Vector3.up * mBody.velocity.y) + (direction * Speed);
+            mBody.AddForce(gravity);
         }
-
-        if (Input.GetButton("Vertical"))
-        {
-            direction += Input.GetAxisRaw("Vertical") * Vector3.forward;
-        }
-
-        Vector3 gravity = Vector3.down * GameManager.Get.gravity * mBody.mass;
-
-        // Maintaining use of Rigidbody force rather than Translation
-        mBody.velocity = (Vector3.up * mBody.velocity.y) + (direction * Speed);
-        mBody.AddForce(gravity);
     }
+
 }

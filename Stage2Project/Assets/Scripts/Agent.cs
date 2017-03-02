@@ -6,8 +6,6 @@ public class Agent : MonoBehaviour
 { 
     public delegate void GameEvent();
     public static event GameEvent OnDecontamination;
-    public static event GameEvent OnExpload;
-    public static event GameEvent OnEscape;
 
     public enum BehaviourState { Disabled, Wandering, Hunting }
     private BehaviourState mState;
@@ -22,7 +20,8 @@ public class Agent : MonoBehaviour
 
     static private WaitForFixedUpdate waitForFixedUpdate = new WaitForFixedUpdate();
 
-    static private GameObject agentPrefab;  // Remove once randomised function written
+    static private GameObject agentPrefab0;  // Remove once randomised function written
+    static private GameObject agentPrefab1;
 
     public RaycastHit [] hits { get; private set; }  // A record of the most recent objects hit by the decision check
 
@@ -60,11 +59,22 @@ public class Agent : MonoBehaviour
     // TODO Load in different agent bodyparts and return a randomised character
     static public GameObject GenerateRandomAgentDesign()
     {
-        if (agentPrefab == null)
+        GameObject randomAgent;
+        if (agentPrefab0 == null)
         {
-            agentPrefab = Resources.Load<GameObject>("Boffin_M");
+            agentPrefab0 = Resources.Load<GameObject>("Boffin_F");
+            agentPrefab1 = Resources.Load<GameObject>("Boffin_M");   
         }
-        GameObject randomAgent = agentPrefab;
+
+        if (Random.Range(0,2) == 0)
+        {
+            randomAgent = agentPrefab0;
+        }
+        else
+        {
+            randomAgent = agentPrefab1;
+        }
+
         return randomAgent;
     }
 
@@ -97,10 +107,10 @@ public class Agent : MonoBehaviour
         transform.position = Vector3.down * 100;  // Store agent outside play area
 
         // Clear steering force components
-        FlockForce = Vector3.zero;
-        WanderForce = Vector3.zero;
-        AvoidWallsForce = Vector3.zero;
-        HuntForce = Vector3.zero;
+//        FlockForce = Vector3.zero;
+//        WanderForce = Vector3.zero;
+//        AvoidWallsForce = Vector3.zero;
+//        HuntForce = Vector3.zero;
 
         mState = BehaviourState.Disabled; // Put behaviour machine in hibernation
     }
@@ -116,6 +126,7 @@ public class Agent : MonoBehaviour
         }
 
         currentTile = Map.Get.AgentSpawnTile;
+        previousTile = currentTile;
         targetTile = currentTile;
 
         // Place agent on spawn point
@@ -125,6 +136,25 @@ public class Agent : MonoBehaviour
         mState = BehaviourState.Wandering;  // Set agent to wander state
 
         StartCoroutine(Co_DecisionTick());  // Run behaviour machine
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Tile"))
+        {
+            if (other.GetComponent<Tile>().myTileType == Tile.TileType.Decontam)
+            {
+                Decontaminate();
+            }
+            else if (other.GetComponent<Tile>().myTileType == Tile.TileType.Escape)
+            {
+                Escape();
+            }
+            else
+            {
+                ArriveAtTile(other.GetComponent<Tile>());
+            }
+        }
     }
 
     public void Decontaminate()
@@ -165,13 +195,72 @@ public class Agent : MonoBehaviour
             }
             else
             {
+                bool priorityTarget = false;
+
                 // Can I see the player
                 if (IsTargetVisible(Player.Get.gameObject))
                 {
                     // Hunt the player
                     print("I CAN SEE THE PLAYER... CHARGE!!!");
+                    priorityTarget = true;
                 }
-                else if (currentTile == targetTile)
+
+                // Can I see an escape exit
+                else if (currentTile.Index.Col % 2 != 0)
+                {
+                    if (currentTile.Index.Row == 0)  // North edge
+                    {
+                        GameObject targetEscapeTile = Map.Get.EscapeTiles[(int) ((currentTile.Index.Col - 1) * 0.5f)].gameObject;
+                        if (IsTargetVisible(targetEscapeTile))
+                        {
+                            print("Can see escape exit north");
+                            targetTile = targetEscapeTile.GetComponent<Tile>();
+                            priorityTarget = true;
+                        }
+                    }
+                    else if (currentTile.Index.Row == Map.Get.MapSizeVertical - 1)  // South edge
+                    {
+                        GameObject targetEscapeTile = Map.Get.EscapeTiles[(int) ((((Map.Get.MapSizeHorizontal - 1) * 0.5f) - 1)
+                                                                         +      (((Map.Get.MapSizeVertical - 1) * 0.5f))
+                                                                         +      ((currentTile.Index.Col - 1) * 0.5f)) ].gameObject;
+                        if (IsTargetVisible(targetEscapeTile))
+                        {
+                            print("Can see escape exit south");
+                            targetTile = targetEscapeTile.GetComponent<Tile>();
+                            priorityTarget = true;
+                        }
+                    }
+                }
+                else if (currentTile.Index.Row % 2 != 0)
+                {
+                    if (currentTile.Index.Col == Map.Get.MapSizeHorizontal - 1)  // East edge
+                    {
+                        GameObject targetEscapeTile = Map.Get.EscapeTiles[(int) ((((Map.Get.MapSizeHorizontal - 1) * 0.5f) - 1)
+                                                                         +      ((currentTile.Index.Row - 1) * 0.5f)) ].gameObject;
+                        if (IsTargetVisible(targetEscapeTile))
+                        {
+                            print("Can see escape exit east");
+                            targetTile = targetEscapeTile.GetComponent<Tile>();
+                            priorityTarget = true;
+                        }
+                    }
+                    else if (currentTile.Index.Col == 0)  // West edge
+                    {
+                        GameObject targetEscapeTile = Map.Get.EscapeTiles[(int) (((((Map.Get.MapSizeHorizontal - 1) * 0.5f) * 2) - 1)
+                                                                         +      ((Map.Get.MapSizeVertical - 1) * 0.5f)
+                                                                         +      ((currentTile.Index.Row - 1) * 0.5f)) ].gameObject;
+                        if (IsTargetVisible(targetEscapeTile))
+                        {
+                            print("Can see escape exit west");
+                            targetTile = targetEscapeTile.GetComponent<Tile>();
+                            priorityTarget = true;
+                        }
+                    }
+                }
+
+                // If there is no player or escape exit in view, check for a regular tile 
+                if ( !priorityTarget
+                  && currentTile == targetTile)
                 {
                     // What are the avilable exits from this tile
                     int numberOfAvailableExits = currentTile.ExitTiles.Length;
@@ -216,10 +305,10 @@ public class Agent : MonoBehaviour
                         resetTargetChoiceTimer = Time.fixedTime + resetTargetChoiceTime;
                     }
 
+                    // If a path is now available cancel any impending explosions
                     if ( shouldExpload
                       && currentTile != targetTile)
                     {
-                        // If a path is now available cancel any impending explosions
                         shouldExpload = false;
                     }
                 }
@@ -360,7 +449,8 @@ public class Agent : MonoBehaviour
         RaycastHit hit;
         Physics.Raycast(transform.position, differenceVector.normalized, out hit, differenceVector.magnitude);
         Debug.DrawLine(transform.position, target.transform.position, Color.red, 2f);
-        if (hit.collider.gameObject == target)
+        if ( hit.collider
+          && hit.collider.gameObject == target)
         {
             return true;
         }
@@ -389,7 +479,6 @@ public class Agent : MonoBehaviour
         // TODO Warn player about to expload
         // TODO Playsound "Oh no!"
         print("OH NO!!!");
-        // TODO Scale up
         transform.localScale = Vector3.one * 3;
 
         yield return waitForExplosionCountDownTime;
@@ -405,11 +494,15 @@ public class Agent : MonoBehaviour
 
     private void Expload()
     {
-        // TODO Playsound "pop!"
-        if(OnExpload != null)
-        {
-            OnExpload();
-        }
+        // TODO Playsound "Pop!"
+        GameManager.Get.RadiationDamage(GameManager.Get.RadiationDamageFromAgents);
+        Reset();
+    }
+
+    public void Escape()
+    {
+        GameManager.Get.RadiationDamage(GameManager.Get.RadiationDamageFromAgents);
+        // TODO Playsound "Wheee!"
         Reset();
     }
 }
