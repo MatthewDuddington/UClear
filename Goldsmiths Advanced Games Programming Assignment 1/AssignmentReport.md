@@ -1,5 +1,5 @@
-#Advanced Programming For Games - Assignment 1#
-##Global Game Jam and Sumo Digital Rising Star##
+# Advanced Programming For Games - Assignment 1  
+## Global Game Jam and Sumo Digital Rising Star  
 
 --------------------------------------------------------------------------------
 
@@ -13,8 +13,8 @@ Each project will be covered separately within the following report.
 
 ![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/00_GameTitle.jpg "Before the Storm")  
 
-##Global Game Jam 2017##
-###January 19th - 22nd###
+## Global Game Jam 2017  
+### January 19th - 22nd  
 
 **Project repository**  
 *github.com/MatthewDuddington/GGJ_2017*  
@@ -46,7 +46,7 @@ The team was structured with a split hierarchy in order to facilitate the rapid 
   He will be responsible for maintaining TIME and SCOPE of the project, and supporting wellbeing and communication as needed.  
   He will have the final decision on issues where a consensus is not being easily reached (i.e. he is the top of the hierarchy) - though in 'normal' circumstances the Design and Technical leads will collaboratively define the direction.
 
-###Practice Jam###
+### Practice Jam  
 
 As this would be the first game jam for several members of the team and the first time several of us had worked together, we decided it would be prudent to undertake a miniature 6 hour practice jam the day before the real jam began. This proved to be highly beneficial as, while our overall design idea was strong, we discovered flaws in how ideas were naturally interpreted by different members of the team and how each individual’s working preference either worked in tandem with or in opposition to the others.
 
@@ -54,7 +54,7 @@ This enabled us to prepare a plan of approach for the GGJ itself the next day:
 
 ![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/01_GeneralPlan.jpg  "General plan")  
 
-###Game Jam Day 1###
+### Game Jam Day 1  
 
 ![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/02_Welcome.jpg "Welcome presentation")  
 
@@ -87,7 +87,7 @@ Because the nature of this idea was a non-traditional PvP style of play, we need
 
 After some initial work setting up the structure for these behaviours the team agreed to break for the night and pick-up on the main bulk of the next stage of the prototype’s development in the morning.
 
-###Game Jam Day 2###
+### Game Jam Day 2  
 
 At this stage the design was sufficiently well defined and with a list of both code and art assets that I was able to switch to my programming role under Witek’s management, while Pablo focused on preparing some early art assets. Here I created functionality for spawning and collecting of coins, and the ‘iron clad’ system of pickups that would provide a way for players to collide with each other in an asymmetrical way to force the dropping of coins.
 
@@ -116,7 +116,7 @@ The production was well received by the audience at the end-of-event show and te
 
 ![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/16_UClear.jpg "Uclear boffins close up") 
 
-##Search for a Star / Sumo Digital Rising Star 2017##
+## Search for a Star / Sumo Digital Rising Star 2017  
 
 **Project repository**  
 *github.com/MatthewDuddington/UClear*  
@@ -125,7 +125,7 @@ The production was well received by the audience at the end-of-event show and te
 
 As was mentioned at the start of my report I was placed onto the ‘Rising Star’ track rather than ‘Search for a Star’; to all intents and purposes these appear to have been identical coding tasks and game jam starting code / briefing, however, my impression is that the expectations for level of achievements and delivery is scaled differently for each group. This likely, favoured my progress into stage 2 following the code test. At the time of writing, the results and feedback for stage 2 have not yet been made known.
 
-###Stage 1 - Code Test###
+### Stage 1 - Code Test  
 
 Stage one involved undertaking a timed (90 minute) set of programming challenge questions within the Hacker Rank web platform. There were 6 questions, of which I was able to answer 3 correctly within the time, while also beginning a forth; there was also a practice question beforehand which I was able to answer correctly.
 
@@ -275,7 +275,7 @@ I felt that, with more time, I would have been able to answer the other question
 
 --------------------------------------------------------------------------------
 
-###Stage 2 - Game Jam###
+### Stage 2 - Game Jam  
 
 For the second stage of the competition we were provided with a Unity project with some starter code and a very open set of guidelines. i.e. that we must create and upload a game that built upon the starter code in an interesting way. The code we were provided with consisted of loading, UI and camera mangers as well as behavioural code that created a pair of rudimentary flocking behaviours.
 
