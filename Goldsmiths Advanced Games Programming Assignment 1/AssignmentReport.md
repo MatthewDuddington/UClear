@@ -11,7 +11,7 @@ Each project will be covered separately within the following report.
 
 --------------------------------------------------------------------------------
 
-IMAGE OF GAME TITLE
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/00_GameTitle.jpg "Before the Storm")  
 
 ##Global Game Jam 2017##
 ###January 19th - 22nd###
@@ -52,39 +52,38 @@ As this would be the first game jam for several members of the team and the firs
 
 This enabled us to prepare a plan of approach for the GGJ itself the next day:  
 
-IMAGE OF PLAN OVERVIEW BOARD
-
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/01_GeneralPlan.jpg  "General plan")  
 
 ###Game Jam Day 1###
 
-IMAGE OF WELCOME
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/02_Welcome.jpg "Welcome presentation")  
 
 For the GGJ itself, we reprised the same team structure but also armed with these adjustments to our approach. At 5pm the theme for this year was announced as being ‘Waves’. We used the first half hour of our time to each independently formulate some initial ideas, after coming together with a ‘no idea is bad’ methodology, we selected a few promising ideas and collaboratively discussed iterations until we settled on an idea developed from Robert Doig’s moving blocks concept.
 
-IAMGE OF IDEAS WITH ARM
-IMAGE OF FINAL IDEAS WHITEBOARD
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/03_Ideas1.jpg "Ideas whiteboard 1") 
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/04_Ideas2.jpg "Ideas whiteboard 2")  
 
 The basic starting premise was moving a player character around a surface of rising and falling cubes that could be manipulated in height by applying forces, the level’s surface might move with a sine wave like pattern and the goal would be to traverse the surface to a goal location. This tentatively had a water and shipwreck theme assigned to it. As project manager I led the construction, prioritisation and simplification of an first sprint plan, discussing with the team what the most important elements of the idea were to ‘prove’ first for us to have a working super basic prototype.
 
-IMAGE OF SPRINT 1 PLAN
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/05_Sprint1.jpg "Sprint 1 sheet")  
 
 At this stage Pablo and I broke away to discuss gameplay development of the idea, while Witek organised his programming sub team based on the sprint plan - as the Goldsmiths’ event was to be moved to a new location within the first 2 hours, the programming was agreed to begin after the move, when we would be able to set up equipment properly. The gameplay development process evolved quickly into physical prototyping in the hallway, where the floor tiles provided a visual grid to work from. The idea evolved into one of two opposing players attempting to collect a set of objects scattered across floating platforms formed from a shipwreck. Several iterations in the physical prototyping revealed challenges in balance and resolving stalemate situations, however, these were resolved through a variety of changes to the design. Before the movement of the event, we had arrived at the conclusion of moving the players off of floating platforms and into lifeboats as well as introducing weapon pickups that would enable to players to affect the water’s surface in order to improve their position or disadvantage the other player.
 
-IMAGE OF PABLO PHYSICAL PROTOTYPE
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/06_PhysicalPrototype.jpg "Physical prototyping") 
 
 After relocating to the main jam location the programming team quickly assembled a working version of the water’s surface and the boat movement. From this we were already able to identify some points of delight and refinements to be made to the core systems. This became the basis for sprint 2, which I again lead the process of ratifying into a minimal and priorities set of tasks to be carried out.
 
-IMAGE OF SPRINT 2 PLAN
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/07_Sprint2.jpg "Sprint 2 sheet")  
 
 While this process was underway, Pablo and I once again broke away to develop the gameplay further based on the experience the code prototype had created for the team. This process lead us away from a shipwreck and towards a pair of battling gallons, completing over resources in an open sea. Several ideas were formed but ultimately put aside as too complex or distracting from the core idea (such as a sea monster being the source of the waves at the centre of the map and something the players could interact with in order to change how the water on the map behaved; and the use of multiple different weapons to interact with the water around the other player).
 
 Ultimately, we decided that the focus of the game should remain on the waves as much as possible and, thus, that the PvE element of play needed to be front and centre. This is where the constantly changing water surface that pushes you around the map was chosen as the key feature and the collectable gold was given a ‘purpose’ beyond simple greed and score - it became a means of survival by weighing down the ships making them more impervious to the waves’ forces.
 
-IMAGE OF WHITEBOARD MAIN IDEA
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/08_MainIdea.jpg "Main idea whiteboard") 
 
 Because the nature of this idea was a non-traditional PvP style of play, we needed to sell the concept to the team. Through negotiations and some ‘final say’ estimations by me as project manager, we agreed on a format to take forwards. Once again a list of proposals for refinement were identified for the next mid sprint session.
 
-IMAGE OF PROPOSALS
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/09_Proposals.jpg "Proposals 1 sheet") 
 
 After some initial work setting up the structure for these behaviours the team agreed to break for the night and pick-up on the main bulk of the next stage of the prototype’s development in the morning.
 
@@ -94,28 +93,28 @@ At this stage the design was sufficiently well defined and with a list of both c
 
 Through the day, in between project management duties, I also added a physics based dispersal system for the coins, setup the coins and pickups to work on an object pool basis (to avoid repeated instantiation and destruction of objects within memory) and a day night cycle structure for driving the timing of the wave changes. The most important part of my role however, was fielding communication between team members, keeping track of progress / the direction the project was heading and, crucially, defining high level tasks for each group. By midday we had defined a list of balancing mechanics that would need to be play tested in the upcoming prototype.
 
-IMAGE OF PLAYTEST LIST
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/10_PlaytestList.jpg "Playtest list") 
 
 Initially, we had hoped to be able to test this by 6pm that evening, however, difficulties in resolving the wave system with transitions as well as sharing interdependent code that was being simultaneously refactored caused a number of lengthly delays. By late that evening we were finally able to test the refined gameplay - to our delight, the game was fun to play and intuitively suggested points for improvement and development.
 
 Infused with energy of experiencing the prototype and nervous of the overrun in time we had needed to spend to reach this point, many of the team members wished to work through the second night on the next series of changes. With the slightly reduced team, many aspects of the wave system were restructured and cleaned up by Witek and Robert, before they were once again joined by Nikita the following morning who, with a rested mind, was able to pick up the programming relay.
 
-IMAGE OF NIGHT TEAM
-IMAGE OF ART DIRECTOR LIST
-IMAGE OF TICK SHEET
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/11_NightTeam.jpg "Night team") 
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/12_ArtDIrectorList.jpg "Art director list") 
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/13_TaskTickSheet.jpg "Task tick sheet") 
 
 Throughout this, Pablo was working on polishing the artwork side and Robert developed the user interface with him. I assisted with small sections of code debugging and art production as well as keeping track of how tasks should progress to help combat the team’s minds succumbing to fatigue. Unfortunately, during the next morning, Pablo was taken ill from the exhaustion of the previous nights work and I had to break away from the project to help him recover and assist with getting him sent back home to rest. However, he left us with the majority of the art work finished that I was able to close off the remaining elements.
 
 With a final push towards the afternoon of the final day, we were able to complete work on the main body of gameplay, such that the prototype demonstrated the game in an entertaining and playable form. With some last minute input from Jade, who had been working with me on the sound and music during the final day, and some break neck squashing of bugs, the final production was quite well rounded.
 
-IMAGE OF ROB PROGRAMMING
-IMAGE OF GAME PLAY
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/14_RobProgramming.jpg "Robert programming") 
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/15_Gameplay.jpg "Before the Storm gameplay") 
 
 The production was well received by the audience at the end-of-event show and tell and the team has felt moved to continue to develop the title with a view to releasing it on Steam Greenlight sometime in the coming months. Witek is currently hard at work on this process!
 
 --------------------------------------------------------------------------------
 
-IMAGE OF CLOSE UP BOFFINS
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/16_UClear.jpg "Uclear boffins close up") 
 
 ##Search for a Star / Sumo Digital Rising Star 2017##
 
@@ -156,7 +155,7 @@ My answer was as follows:
 
 Following are screen shots of the three questions I was able to answer in the time available and my code snippets.
 
-IMAGE OF Q1
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/17_Q1.jpg "Question 1") 
 
     #include <iostream>
     #include <string>
@@ -185,7 +184,7 @@ IMAGE OF Q1
         return 0;
     }
 
-IMAGE of Q3
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/18_Q3.jpg "Question 3") 
 
     #include <iostream>
     #include <string>
@@ -222,7 +221,7 @@ IMAGE of Q3
         return 0;
     }
 
-IMAGE OF Q4
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/19_Q4.jpg "Question 4") 
 
     #include <iostream>
     #include <vector>
@@ -266,9 +265,9 @@ IMAGE OF Q4
 
 For interest, these were the remaining three questions in the test. I had began to answer the reverse linked list question when time ended for the test.  
 
-IMAGE OF Q2  
-IMAGE OF Q5  
-IMAGE OF Q6  
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/20_Q2.jpg "Question 2") 
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/21_Q5.jpg "Question 5") 
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/22_Q6.jpg "Question 6") 
 
 I felt that, with more time, I would have been able to answer the other questions in the test. Though in all cases I required time to look up the standard guidelines in order to know which features to use.  
 
@@ -291,8 +290,8 @@ Within a Map class I used a two dimensional array to store a series of reference
 
 While I was creating the working prototype of this system I realised that it would be beneficial and more challenging overall to make the map size adaptable. Therefore, I ensured that all my array calculations referenced Min/Max type values. Though, as the classic map design assumed an odd numbered size of map on each axis, I also ran a check that would adapt the user values if necessary.
 
-IMAGE OF MAP  
-IMAGE OF ALTERNATIVE MAP SIZES  
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/23_Map.jpg "Normal sized map") 
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/24_MapSizes.jpg "Example size maps") 
 
 With the map structure working relatively quickly, I started work on the AI system. However, this lead to the largest problem with my project. While I understood the principle of how the current steering behaviours worked, what I wanted from my AI and what kinds of behaviours would achieve this, when all the different behaviour parts interacted with each other, they did not have the desired effect, and I repeatedly found myself struggling to achieve movement that didn’t simply cancel out each opposing vector or alternatively moved the agents but which would quickly drive them into a wall and get stuck there.
 
@@ -306,4 +305,4 @@ In the shipping version of the game there are a number of inefficiencies. Primar
 
 While this segment of the project did not require me to make use of C++, the challenge of implementing the rearrangeable tile grid was an interesting one, and one which I can see being very useful to my work in future games. Likewise, the challenge of devising and implementing a game on my own, in what felt to be a relatively short space of time, was both scary and motivating. Though I was unable to spend very much time polishing the gameplay because of the AI struggles consuming much of my time, I am pleased with the result as a starting point for a project I would like to continue developing later in the year.
 
-IMAGE OF GAMEPLAY
+![alt text](https://github.com/MatthewDuddington/UClear/blob/master/Goldsmiths%20Advanced%20Games%20Programming%20Assignment%201/Report%20Images/25_UclearGameplay.jpg "UClear gameplay") 
