@@ -122,6 +122,8 @@ The production was well received by the audience at the end-of-event show and te
 *github.com/MatthewDuddington/UClear*  
 **Playable Game Link & Itch.io Gamepage**  
 *https://owlkinmd.itch.io/uclear*  
+**Project video**  
+*youtube.com/watch?v=s_JdubsJXjo*  
 
 As was mentioned at the start of my report I was placed onto the ‘Rising Star’ track rather than ‘Search for a Star’; to all intents and purposes these appear to have been identical coding tasks and game jam starting code / briefing, however, my impression is that the expectations for level of achievements and delivery is scaled differently for each group. This likely, favoured my progress into stage 2 following the code test. At the time of writing, the results and feedback for stage 2 have not yet been made known.
 
